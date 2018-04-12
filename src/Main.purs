@@ -2,6 +2,7 @@ module Main where
 
 import Prelude
 
+import CSS (gray)
 import CSS as CSS
 import Color (Color, rgb)
 import Control.Monad.Aff.Class (class MonadAff)
@@ -16,6 +17,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), maybe)
+import Data.Newtype (wrap)
 import Data.Tuple (Tuple(..))
 import Halogen as H
 import Halogen.Aff (HalogenEffects, awaitLoad, runHalogenAff, selectElement)
@@ -31,7 +33,8 @@ derive instance ordWordType :: Ord WordType
 derive instance genericWordType :: Generic WordType _
 instance showWordType :: Show WordType where show = genericShow
 type Word = Tuple WordType String
-data Punctuation = Comma | Newline | Space | Period
+data Punctuation = Comma | Newline | Space | Period | Colon
+  | Enclitic String | Translation String
 derive instance eqPunctuation :: Eq Punctuation
 derive instance ordPunctuation :: Ord Punctuation
 derive instance genericPunctuation :: Generic Punctuation _
@@ -60,6 +63,15 @@ newline = Left Newline
 
 space :: Entity
 space = Left Space
+
+colon :: Entity
+colon = Left Colon
+
+_que :: Entity
+_que = Left (Enclitic "que")
+
+lit_ :: String -> Entity
+lit_ = Left <<< Translation
 
 verb :: String -> Word
 verb = Tuple Verb
@@ -166,6 +178,9 @@ spacify' = foldl folder { res: [], allow_space: false } where
     Comma -> Tuple false true
     Period -> Tuple false true
     Space -> Tuple false false
+    Colon -> Tuple false true
+    Enclitic _ -> Tuple false true
+    Translation _ -> Tuple true true
   folder { res, allow_space } (Right w) =
     { allow_space: true
     , res: res <> spaceIf allow_space <> [Right w]
@@ -184,6 +199,9 @@ punctuate = case _ of
   Comma -> HH.text ","
   Space -> HH.text " "
   Newline -> HH.br_
+  Colon -> HH.text ":"
+  Enclitic c -> HH.span [style (CSS.color gray)] [ HH.text c ]
+  Translation t -> HH.span [HP.class_ (wrap "translation")] [ HH.text t ]
 
 {-
 split :: Codex -> Array Codex
@@ -214,10 +232,41 @@ sample { author, content, glosses } = HH.section_
 sample1 :: Sample
 sample1 = { author: "Hrabanus Maurus", content, glosses } where
   content =
-    [ verb_ "Venī", noun_ "creātor", comma, noun_ "Spiritus", comma, newline
-    , noun_ "mentēs", pronoun_ "tuōrum", verb_ "visitā", comma, newline
-    , verb_ "implē", adjective_ "superna", noun_ "grātia", newline
-    , pronoun_ "quae", pronoun_ "tū", verb_ "creāstī", noun_ "pectora", period
+    [ noun_ "nūbibus", adjective_ "ātrīs", lit_ "dark clouds", newline
+    , adjective_ "condita", adjective_ "nūllum", lit_ "(hidden) [no]", newline
+    , verb_ "fundere", verb_ "possunt", lit_ "() are able to pour []", newline
+    , noun_ "sīdera", noun_ "lūmen", lit_ "(stars) [light]", newline
+
+    , conjunction_ "sī", noun_ "mare", verb_ "volvēns", newline
+    , adjective_ "turbidus", noun_ "Auster", newline
+    , verb_ "misceat", noun_ "aestum", comma, newline
+    , adjective_ "vitrea", adverb_ "dūdum", newline
+    , adverb_ "par", _que, adjective_ "serēnīs", newline
+    , noun_ "unda", noun_ "diēbus", newline
+    , adverb_ "mox", adjective_ "resolūtō", newline
+    , adjective_ "sordida", noun_ "caenō", newline
+    , noun_ "vīsibus", verb_ "obstat", comma, newline
+
+    , pronoun_ "quīque", verb_ "vagātur", newline
+    , noun_ "montibus", adjective_ "altīs", newline
+    , adjective_ "dēfluus", noun_ "amnīs", newline
+    , adverb_ "saepe", verb_ "restitit", newline
+    , noun_ "rūpe", adjective_ "solūtī", newline
+    , noun_ "ōbice", noun_ "saxī", period, newline
+
+    , pronoun_ "tū", adverb_ "quoque", conjunction_ "sī", verb_ "vīs", newline
+    , noun_ "lūmine", adjective_ "clārī", newline
+    , verb_ "cernere", noun_ "vērum", newline
+    , noun_ "trāmite", adjective_ "rēctō", newline
+    , verb_ "carpere", noun_ "callem", colon, newline
+    , noun_ "gaudia", verb_ "pelle", comma, newline
+    , verb_ "pelle", noun_ "timōrem", newline
+    , noun_ "spem", _que, verb_ "fugātō", newline
+    , conjunction_ "nec", noun_ "dolor", verb_ "adsit", newline
+
+    , adjective_ "nūbila", noun_ "mēns", verb_ "est", newline
+    , adjective_ "vincta", _que, noun_ "frēnīs", newline
+    , pronoun_ "haec", adverb_ "ubi", verb_ "regnant", period
     ]
   glosses = Map.fromFoldable
     [ Tuple "creāstī" "= creāvistī"
