@@ -14,11 +14,10 @@ import Data.Either (Either(..))
 import Data.Foldable (foldl, traverse_)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Map (Map)
-import Data.Map as Map
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
-import Data.Tuple (Tuple(..))
+import Data.String (split)
+import Data.Tuple (Tuple(..), snd)
 import Halogen as H
 import Halogen.Aff (HalogenEffects, awaitLoad, runHalogenAff, selectElement)
 import Halogen.HTML as HH
@@ -32,7 +31,15 @@ derive instance eqWordType :: Eq WordType
 derive instance ordWordType :: Ord WordType
 derive instance genericWordType :: Generic WordType _
 instance showWordType :: Show WordType where show = genericShow
-type Word = Tuple WordType String
+type Word =
+  { word_type :: WordType
+  , text :: String
+  , href :: String
+  , def :: String
+  , alternate :: String
+  , origin :: String
+  , role :: String
+  }
 data Punctuation = Comma | Newline | Space | Period | Colon
   | Enclitic String | Translation String
 derive instance eqPunctuation :: Eq Punctuation
@@ -40,13 +47,11 @@ derive instance ordPunctuation :: Ord Punctuation
 derive instance genericPunctuation :: Generic Punctuation _
 instance showPunctuation :: Show Punctuation where show = genericShow
 type Entity = Either Punctuation Word
-type Codex = Array Entity
-type Gloss = String
-type Glossed = { glossed :: Word, gloss :: Gloss }
+type Line = Array Entity
+type Codex = Array Line
 type Sample =
   { author :: String
   , content :: Codex
-  , glosses :: Map String Gloss
   }
 
 word :: Word -> Entity
@@ -73,26 +78,41 @@ _que = Left (Enclitic "que")
 lit_ :: String -> Entity
 lit_ = Left <<< Translation
 
+mkword :: WordType -> String -> Word
+mkword word_type = { href: "", def: "", origin: "", alternate: "", role: "", word_type, text: _ }
+
+addef :: Entity -> String -> Entity
+addef w def = w <#> _ { def = def }
+infixl 9 addef as @=
+
+as :: Entity -> String -> Entity
+as w role = w <#> _ { role = role }
+infixl 9 as as @$
+
+from :: Entity -> String -> Entity
+from w origin = w <#> _ { origin = origin }
+infixl 9 from as @<
+
 verb :: String -> Word
-verb = Tuple Verb
+verb = mkword Verb
 
 adverb :: String -> Word
-adverb = Tuple Adverb
+adverb = mkword Adverb
 
 conjunction :: String -> Word
-conjunction = Tuple Conjunction
+conjunction = mkword Conjunction
 
 noun :: String -> Word
-noun = Tuple Noun
+noun = mkword Noun
 
 pronoun :: String -> Word
-pronoun = Tuple Pronoun
+pronoun = mkword Pronoun
 
 adjective :: String -> Word
-adjective = Tuple Adjective
+adjective = mkword Adjective
 
 particle :: String -> Word
-particle = Tuple Particle
+particle = mkword Particle
 
 verb_ :: String -> Entity
 verb_ = word <<< verb
@@ -163,14 +183,20 @@ colorType = case _ of
   Particle -> rgb 190 30 148
 
 colorize' :: forall o w. Array (HH.IProp HTMLspan o) -> Word -> HH.HTML w o
-colorize' props (Tuple typ w) =
-  HH.span (props <> [style (CSS.color (colorType typ))])
-    [ HH.text w ]
+colorize' props { word_type, text, role } =
+  let
+    couleur = CSS.color (colorType word_type)
+    klass = HP.classes $ map wrap $ split (wrap " ") role
+  in HH.span (props <> [latin, klass, style couleur])
+    [ HH.text text ]
+
+latin :: forall i r. HP.IProp ( lang :: String | i ) r
+latin = HP.prop (H.PropName "lang") "la"
 
 colorize :: forall o w. Word -> HH.HTML w o
 colorize = colorize' []
 
-spacify' :: Codex -> { res :: Codex, allow_space :: Boolean }
+spacify' :: Line -> { res :: Line, allow_space :: Boolean }
 spacify' = foldl folder { res: [], allow_space: false } where
   spaceIf = if _ then [space] else []
   classify = case _ of
@@ -190,7 +216,7 @@ spacify' = foldl folder { res: [], allow_space: false } where
     { allow_space: space_after
     , res: res <> spaceIf (allow_space && space_before) <> [Left p]
     }
-spacify :: Codex -> Codex
+spacify :: Line -> Line
 spacify = _.res <<< spacify'
 
 punctuate :: forall o w. Punctuation -> HH.HTML w o
@@ -208,77 +234,66 @@ split :: Codex -> Array Codex
 split =
 -}
 
-codex :: forall o w. Codex -> HH.HTML w o
-codex caudex = HH.div_ $ spacify caudex <#> case _ of
-  Left p -> punctuate p
-  Right word -> colorize word
-
-sample :: forall o w. Sample -> HH.HTML w (Maybe Glossed)
-sample { author, content, glosses } = HH.section_
+sample :: forall o w. Sample -> HH.HTML w (Tuple Boolean (Maybe Word))
+sample { author, content } = HH.section_
   [ HH.h2_ [ HH.text author ]
-  , HH.div_ $ spacify content <#> case _ of
-      Left p -> punctuate p
-      Right word@(Tuple typ w) -> word # colorize'
-        case Map.lookup w glosses of
-          Nothing -> []
-          Just gloss ->
-            let glossed = { glossed: word, gloss } in
-            [ HP.title gloss
-            , HE.onMouseOver (pure $ pure $ pure glossed)
-            , HE.onMouseOut (pure $ pure $ Nothing)
-            ]
+  , HH.div_ $ map spacify content <#>
+      HH.p [HP.class_ (wrap "line")] <<< map case _ of
+        Left p -> punctuate p
+        Right word -> word # colorize'
+          [ HP.title word.role
+          , HE.onMouseOver (pure $ pure $ Tuple false $ pure word)
+          , HE.onMouseOut (pure $ pure $ Tuple false $ Nothing)
+          , HE.onClick (pure $ pure $ Tuple true $ pure word)
+          ]
   ]
 
 sample1 :: Sample
-sample1 = { author: "Hrabanus Maurus", content, glosses } where
+sample1 = { author: "Hrabanus Maurus", content } where
   content =
-    [ noun_ "nūbibus", adjective_ "ātrīs", lit_ "dark clouds", newline
-    , adjective_ "condita", adjective_ "nūllum", lit_ "(hidden) [no]", newline
-    , verb_ "fundere", verb_ "possunt", lit_ "() are able to pour []", newline
-    , noun_ "sīdera", noun_ "lūmen", lit_ "(stars) [light]", newline
+    [ [ noun_ "nūbibus" @= "clouds", adjective_ "ātrīs" @= "dark" ]
+    , [ adjective_ "condita" @= "hidden" @$ "nominative subject", adjective_ "nūllum" @= "no" @$ "accusative object" ]
+    , [ verb_ "fundere" @= "to pour", verb_ "possunt" @= "are able" ]
+    , [ noun_ "sīdera" @= "stars" @$ "nominative subject", noun_ "lūmen" @= "light" @$ "accusative object" ]
 
-    , conjunction_ "sī", noun_ "mare", verb_ "volvēns", newline
-    , adjective_ "turbidus", noun_ "Auster", newline
-    , verb_ "misceat", noun_ "aestum", comma, newline
-    , adjective_ "vitrea", adverb_ "dūdum", newline
-    , adverb_ "par", _que, adjective_ "serēnīs", newline
-    , noun_ "unda", noun_ "diēbus", newline
-    , adverb_ "mox", adjective_ "resolūtō", newline
-    , adjective_ "sordida", noun_ "caenō", newline
-    , noun_ "vīsibus", verb_ "obstat", comma, newline
+    , [ conjunction_ "sī" @= "if", noun_ "mare" @= "sea" @$ "accusative object", verb_ "volvēns" @= "rolling" @$ "active" ]
+    , [ adjective_ "turbidus" @= "turbulent", noun_ "Auster" @= "the South Wind" ]
+    , [ verb_ "misceat" @= "stir up", noun_ "aestum" @= "surge" @$ "accusative object", comma ]
+    , [ adjective_ "vitrea" @= "glassy", adverb_ "dūdum" @= "just now" ]
+    , [ adverb_ "par" @= "equally", _que, adjective_ "serēnīs" @= "tranquil" ]
+    , [ noun_ "unda" @= "wave" @$ "nominative subject", noun_ "diēbus" @= "days" ]
+    , [ adverb_ "mox" @= "soon", adjective_ "resolūtō" @= "loosened" ]
+    , [ adjective_ "sordida" @= "foul", noun_ "caenō" @= "mud" @$ "ablative of means" ]
+    , [ noun_ "vīsibus" @= "sight(s)", verb_ "obstat" @= "blocks", comma ]
 
-    , pronoun_ "quīque", verb_ "vagātur", newline
-    , noun_ "montibus", adjective_ "altīs", newline
-    , adjective_ "dēfluus", noun_ "amnīs", newline
-    , adverb_ "saepe", verb_ "restitit", newline
-    , noun_ "rūpe", adjective_ "solūtī", newline
-    , noun_ "ōbice", noun_ "saxī", period, newline
+    , [ pronoun_ "quīque" @= "whatever" @$ "nominative subject", verb_ "vagātur" @= "wanders" ]
+    , [ noun_ "montibus" @= "mountains", adjective_ "altīs" @= "tall" ]
+    , [ adjective_ "dēfluus" @= "flowing down" @$ "ablative of place from which", noun_ "amnis" @= "river" @$ "nominative subject" ]
+    , [ adverb_ "saepe" @= "often", verb_ "restitit" @= "remains" ]
+    , [ noun_ "rūpe" @= "cliff", adjective_ "solūtī" @= "loose" ]
+    , [ noun_ "ōbice" @< "ōbex" @= "obstacle" @$ "ablative of place where", noun_ "saxī" @= "rock", period ]
 
-    , pronoun_ "tū", adverb_ "quoque", conjunction_ "sī", verb_ "vīs", newline
-    , noun_ "lūmine", adjective_ "clārī", newline
-    , verb_ "cernere", noun_ "vērum", newline
-    , noun_ "trāmite", adjective_ "rēctō", newline
-    , verb_ "carpere", noun_ "callem", colon, newline
-    , noun_ "gaudia", verb_ "pelle", comma, newline
-    , verb_ "pelle", noun_ "timōrem", newline
-    , noun_ "spem", _que, verb_ "fugātō", newline
-    , conjunction_ "nec", noun_ "dolor", verb_ "adsit", newline
+    , [ pronoun_ "tū" @= "you", adverb_ "quoque" @= "also", conjunction_ "sī" @= "if", verb_ "vīs" @= "want" ]
+    , [ noun_ "lūmine" @= "light", adjective_ "clārō" @= "clear" ]
+    , [ verb_ "cernere" @= "discern", noun_ "vērum" @= "the truth" @$ "accusative object" ]
+    , [ noun_ "trāmite" @= "riverbed", adjective_ "rēctō" @= "straight" ]
+    , [ verb_ "carpere" @= "seize", noun_ "callem" @= "path" @$ "accusative object", colon ]
+    , [ noun_ "gaudia" @= "joys" @$ "accusative object", verb_ "pelle" @= "drive away", comma ]
+    , [ verb_ "pelle" @= "drive away", noun_ "timōrem" @= "fear" @$ "accusative object" ]
+    , [ noun_ "spem" @= "hope", _que, verb_ "fugātō" @= "put to flight" ]
+    , [ conjunction_ "nec" @= "nor", noun_ "dolor" @= "grief" @$ "nominative subject", verb_ "adsit" @= "be present" ]
 
-    , adjective_ "nūbila", noun_ "mēns", verb_ "est", newline
-    , adjective_ "vincta", _que, noun_ "frēnīs", newline
-    , pronoun_ "haec", adverb_ "ubi", verb_ "regnant", period
-    ]
-  glosses = Map.fromFoldable
-    [ Tuple "creāstī" "= creāvistī"
+    , [ adjective_ "nūbila" @= "cloudy" @$ "predicate", noun_ "mēns" @= "mind" @$ "nominative subject", verb_ "est" @= "is" ]
+    , [ adjective_ "vincta" @= "bound" @$ "predicate", _que, noun_ "frēnīs" @= "bridle" @$ "ablative of instrument" ]
+    , [ pronoun_ "haec" @= "these things" @$ "nominative subject", adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
     ]
 
 type State =
-  { glossing :: Maybe Glossed
+  { glossing :: Maybe (Tuple Boolean Word)
   }
 data Query a
   = DoNothing a
-  | Gloss Glossed a
-  | Ungloss a
+  | Gloss (Tuple Boolean (Maybe Word)) a
 type ChildSlot = Void
 type ChildrenQuery = Const Void
 
@@ -294,9 +309,16 @@ body = H.lifecycleParentComponent
     render :: State -> H.ParentHTML Query ChildrenQuery ChildSlot m
     render { glossing } =
       HH.div [ HP.id_ "parent" ]
-        [ sidebar glossing, HH.div [] [ glosser <$> sample sample1 ] ]
+        [ sidebar (glossing <#> snd), HH.div [] [ glosser <$> sample sample1 ] ]
 
-    glosser = H.action <<< maybe Ungloss Gloss
+    glosser = H.action <<< Gloss
+
+    nonempty :: forall a. String -> (String -> a) -> Array a
+    nonempty "" _ = []
+    nonempty v f = [f v]
+
+    p = HH.p_ <<< pure <<< HH.text
+    sp = HH.span_ <<< pure <<< HH.text
 
     sidebar glossing = HH.div
       [ HP.id_ "sidebar"
@@ -308,13 +330,26 @@ body = H.lifecycleParentComponent
       ]
       case glossing of
         Nothing -> [ HH.text "" ]
-        Just { glossed, gloss } ->
-          [ HH.h3_ [ colorize glossed ], HH.p_ [ HH.text gloss ] ]
+        Just glossed -> join
+          [ pure $ HH.h3_ [ colorize glossed ]
+          , nonempty glossed.alternate (sp <<< append " = ")
+          , nonempty glossed.origin (sp <<< append " < ")
+          , nonempty glossed.def \v ->
+              HH.p [HP.class_ (wrap "translation")]
+                [ HH.text $ "“" <> v <> "”" ]
+          , nonempty glossed.role p
+          ]
 
     eval :: Query ~> H.ParentDSL State Query ChildrenQuery ChildSlot Void m
     eval (DoNothing a) = pure a
-    eval (Gloss g a) = a <$ H.modify _ { glossing = Just g }
-    eval (Ungloss a) = a <$ H.modify _ { glossing = Nothing }
+    eval (Gloss (Tuple clicked value) a) = a <$ do
+      H.modify \r ->
+        let
+          glossing = case clicked, r.glossing of
+            true, Just (Tuple true _) -> Nothing
+            false, Just (Tuple true _) -> r.glossing
+            _, _ -> value <#> Tuple clicked
+        in r { glossing = glossing }
 
 main :: Eff (HalogenEffects ()) Unit
 main = runHalogenAff do

@@ -6,23 +6,37 @@
     h1, h2 {
       font-family: "Kleymissky";
       font-weight: normal;
+      margin-bottom: 3px;
+    }
+    .help {
+      font-family: "Simonetta";
+      font-size: 18px;
+    }
+    :lang(la) {
+      font-family: "Junicode";
     }
     body {
-      font-family: "Junicode", "Libertinus Serif Display";
+      font-family: "Simonetta";
       margin: 0;
       font-size: 44px;
     }
+    p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
     .translation {
       font-family: "Simonetta";
-      float: right;
     }
     #sidebar {
       float: right;
       width: 30%;
       text-align: right;
+      position: fixed;
+      right: 20px;
     }
     #sidebar h3 {
       font-size: 40px;
+      margin-bottom: 0;
     }
     #sidebar {
       font-size: 36px;
@@ -54,10 +68,17 @@
     .adjective {
       color: rgb(39, 212, 41);
     }
+    .subject {
+      text-decoration: orange dotted underline;
+    }
+    .object {
+      text-decoration: purple dotted underline;
+    }
   </style>
 </head>
 <body>
   <h1>Translatinator</h1>
+  <p class="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel).</p>
   <div id="app"></div>
 </body>
 </html>
