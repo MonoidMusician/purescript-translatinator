@@ -1,5 +1,5 @@
 {
-  "name": "purescript-translatinate",
+  "name": "purescript-translatinator",
   "ignore": [
     "**/.*",
     "node_modules",

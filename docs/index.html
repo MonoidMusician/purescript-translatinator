@@ -8,30 +8,43 @@
       font-weight: normal;
       margin-bottom: 3px;
     }
+    h3.section {
+      display: inline;
+      font-family: "Simonetta";
+      margin-top: 0;
+      font-size: 30px;
+      font-weight: normal;
+      margin-left: 1em;
+    }
     .help {
       font-family: "Simonetta";
       font-size: 18px;
     }
     :lang(la) {
       font-family: "Junicode";
+      font-size: 117%;
     }
     body {
       font-family: "Simonetta";
       margin: 0;
-      font-size: 44px;
+      font-size: 36px;
     }
     p {
       margin-top: 0.25em;
       margin-bottom: 0.25em;
     }
-    .translation {
-      font-family: "Simonetta";
+    p.line {
+      margin: 0;
+    }
+    .translation-parent {
+      display: grid;
+      grid-template-columns: 40% 40%;
     }
     #sidebar {
-      float: right;
+      position: fixed;
+      /*float: right;*/
       width: 30%;
       text-align: right;
-      position: fixed;
       right: 20px;
     }
     #sidebar h3 {

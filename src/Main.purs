@@ -9,6 +9,7 @@ import Control.Monad.Aff.Class (class MonadAff)
 import Control.Monad.Eff (Eff)
 import DOM.HTML.Indexed (HTMLspan)
 import DOM.Node.ParentNode (QuerySelector(..))
+import Data.Array (mapWithIndex)
 import Data.Const (Const)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, traverse_)
@@ -16,7 +17,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
-import Data.String (split)
+import Data.String as String
 import Data.Tuple (Tuple(..), snd)
 import Halogen as H
 import Halogen.Aff (HalogenEffects, awaitLoad, runHalogenAff, selectElement)
@@ -51,7 +52,10 @@ type Line = Array Entity
 type Codex = Array Line
 type Sample =
   { author :: String
+  , work :: String
+  , section :: String
   , content :: Codex
+  , translation :: String
   }
 
 word :: Word -> Entity
@@ -185,8 +189,8 @@ colorType = case _ of
 colorize' :: forall o w. Array (HH.IProp HTMLspan o) -> Word -> HH.HTML w o
 colorize' props { word_type, text, role } =
   let
-    couleur = CSS.color (colorType word_type)
-    klass = HP.classes $ map wrap $ split (wrap " ") role
+    couleur = CSS.color $ CSS.darken 0.05 $ colorType word_type
+    klass = HP.class_ $ wrap role
   in HH.span (props <> [latin, klass, style couleur])
     [ HH.text text ]
 
@@ -229,27 +233,45 @@ punctuate = case _ of
   Enclitic c -> HH.span [style (CSS.color gray)] [ HH.text c ]
   Translation t -> HH.span [HP.class_ (wrap "translation")] [ HH.text t ]
 
-{-
-split :: Codex -> Array Codex
-split =
--}
+nonempty :: forall a. String -> (String -> a) -> Array a
+nonempty "" _ = []
+nonempty v f = [f v]
 
-sample :: forall o w. Sample -> HH.HTML w (Tuple Boolean (Maybe Word))
-sample { author, content } = HH.section_
-  [ HH.h2_ [ HH.text author ]
-  , HH.div_ $ map spacify content <#>
-      HH.p [HP.class_ (wrap "line")] <<< map case _ of
-        Left p -> punctuate p
-        Right word -> word # colorize'
-          [ HP.title word.role
-          , HE.onMouseOver (pure $ pure $ Tuple false $ pure word)
-          , HE.onMouseOut (pure $ pure $ Tuple false $ Nothing)
-          , HE.onClick (pure $ pure $ Tuple true $ pure word)
-          ]
+split :: String -> Array String
+split = String.trim >>> String.split (String.Pattern "\n")
+
+sample :: forall w. Sample -> HH.HTML w (Tuple Boolean (Maybe Word))
+sample { author, work, section, content, translation } = HH.section_
+  [ HH.h2_ $ join [ [ HH.text (author <> ": " <> work) ], sec ]
+  , HH.div [ HP.class_ (wrap "translation-parent") ] $ join
+    [ map spacify content
+      # mapWithIndex \row ->
+        HH.p [HP.class_ (wrap "line"), atRow row] <<< map case _ of
+          Left p -> punctuate p
+          Right w -> w # colorize'
+            [ HP.title w.role
+            , HE.onClick (pure $ pure $ Tuple true $ pure w)
+            , HE.onMouseOver (pure $ pure $ Tuple false $ pure w)
+            , HE.onMouseOut (pure $ pure $ Tuple false $ Nothing)
+            ]
+    , split translation
+      # mapWithIndex \row ->
+        HH.p [atRow row] <<< pure <<< HH.text <<< (<>) " "
+    ]
   ]
+  where
+    sec =
+      nonempty section $ pure $ HH.h3 [ HP.class_ (wrap "section") ]
+        [ HH.text ("(" <> section <> ")") ]
+    atRow row = style (CSS.key (CSS.fromString "grid-row") (show (row+1)))
 
 sample1 :: Sample
-sample1 = { author: "Hrabanus Maurus", content } where
+sample1 =
+  { author: "Boëthius"
+  , work: "Philosophy’s Consolation"
+  , section: "Metron 1.7"
+  , content, translation
+  } where
   content =
     [ [ noun_ "nūbibus" @= "clouds", adjective_ "ātrīs" @= "dark" ]
     , [ adjective_ "condita" @= "hidden" @$ "nominative subject", adjective_ "nūllum" @= "no" @$ "accusative object" ]
@@ -287,6 +309,39 @@ sample1 = { author: "Hrabanus Maurus", content } where
     , [ adjective_ "vincta" @= "bound" @$ "predicate", _que, noun_ "frēnīs" @= "bridle" @$ "ablative of instrument" ]
     , [ pronoun_ "haec" @= "these things" @$ "nominative subject", adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
     ]
+  translation = """
+  Through black clouds
+  the hidden stars
+  can pour
+  no light.
+  If the turbulent South wind
+  stirs up a surge,
+  riling up the sea,
+  the wave,
+  just now glassy
+  (as on calm days),
+  soon foul with
+  loosened mud
+  blocks sight.
+  Whatever river
+  wanders flowing down
+  the tall mountains
+  often remains
+  at an obstacle,
+  a cliff of loose rock
+  Tu also if you want
+  to discern the truth
+  in a clear light,
+  to seize upon a path
+  in the straight riverbed:
+  throw aside joys,
+  banish fear,
+  and put hope to flight –
+  let there be no grief!
+  The mind is cloudy
+  and bound by bridles
+  when these things reign.
+  """
 
 type State =
   { glossing :: Maybe (Tuple Boolean Word)
@@ -309,31 +364,23 @@ body = H.lifecycleParentComponent
     render :: State -> H.ParentHTML Query ChildrenQuery ChildSlot m
     render { glossing } =
       HH.div [ HP.id_ "parent" ]
-        [ sidebar (glossing <#> snd), HH.div [] [ glosser <$> sample sample1 ] ]
+        [ sidebar (glossing <#> snd)
+        , HH.div [] [ glosser <$> sample sample1 ]
+        ]
 
     glosser = H.action <<< Gloss
 
-    nonempty :: forall a. String -> (String -> a) -> Array a
-    nonempty "" _ = []
-    nonempty v f = [f v]
-
     p = HH.p_ <<< pure <<< HH.text
-    sp = HH.span_ <<< pure <<< HH.text
+    spla = HH.span [ latin ] <<< pure <<< HH.text
 
     sidebar glossing = HH.div
-      [ HP.id_ "sidebar"
-      , style do
-          -- CSS.backgroundColor purple
-          CSS.width (30.0 # CSS.pct)
-          -- CSS.height (100.0 # CSS.pct)
-          CSS.float CSS.floatRight
-      ]
+      [ HP.id_ "sidebar" ]
       case glossing of
         Nothing -> [ HH.text "" ]
         Just glossed -> join
           [ pure $ HH.h3_ [ colorize glossed ]
-          , nonempty glossed.alternate (sp <<< append " = ")
-          , nonempty glossed.origin (sp <<< append " < ")
+          , nonempty glossed.alternate (spla <<< append " = ")
+          , nonempty glossed.origin (spla <<< append " < ")
           , nonempty glossed.def \v ->
               HH.p [HP.class_ (wrap "translation")]
                 [ HH.text $ "“" <> v <> "”" ]
