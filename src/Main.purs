@@ -2,14 +2,13 @@ module Main where
 
 import Prelude
 
-import CSS (gray)
 import CSS as CSS
 import Color (Color, rgb)
 import Control.Monad.Aff.Class (class MonadAff)
 import Control.Monad.Eff (Eff)
 import DOM.HTML.Indexed (HTMLspan)
 import DOM.Node.ParentNode (QuerySelector(..))
-import Data.Array (mapWithIndex)
+import Data.Array (intercalate, mapWithIndex)
 import Data.Const (Const)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, traverse_)
@@ -27,7 +26,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 
-data WordType = Verb | Adverb | Conjunction | Noun | Pronoun | Adjective | Particle
+data WordType = Verb | Adverb | Conjunction | Noun | Pronoun | Adjective | Particle | Preposition
 derive instance eqWordType :: Eq WordType
 derive instance ordWordType :: Ord WordType
 derive instance genericWordType :: Generic WordType _
@@ -41,7 +40,7 @@ type Word =
   , origin :: String
   , role :: String
   }
-data Punctuation = Comma | Newline | Space | Period | Colon
+data Punctuation = Comma | Newline | Space | Period | Colon | Semicolon
   | Enclitic String | Translation String
 derive instance eqPunctuation :: Eq Punctuation
 derive instance ordPunctuation :: Ord Punctuation
@@ -75,6 +74,9 @@ space = Left Space
 
 colon :: Entity
 colon = Left Colon
+
+semicolon :: Entity
+semicolon = Left Semicolon
 
 _que :: Entity
 _que = Left (Enclitic "que")
@@ -118,6 +120,9 @@ adjective = mkword Adjective
 particle :: String -> Word
 particle = mkword Particle
 
+preposition :: String -> Word
+preposition = mkword Preposition
+
 verb_ :: String -> Entity
 verb_ = word <<< verb
 
@@ -138,6 +143,9 @@ adjective_ = word <<< adjective
 
 particle_ :: String -> Entity
 particle_ = word <<< particle
+
+preposition_ :: String -> Entity
+preposition_ = word <<< preposition
 
 {-
 verb - red
@@ -175,6 +183,9 @@ particle - purple
 .particle {
   color: rgb(190, 30, 148);
 }
+.preposition {
+  color: rgb(142, 44, 171);
+}
 -}
 colorType :: WordType -> Color
 colorType = case _ of
@@ -185,6 +196,7 @@ colorType = case _ of
   Pronoun -> rgb 28 161 190
   Adjective -> rgb 39 212 41
   Particle -> rgb 190 30 148
+  Preposition -> rgb 142 44 171
 
 colorize' :: forall o w. Array (HH.IProp HTMLspan o) -> Word -> HH.HTML w o
 colorize' props { word_type, text, role } =
@@ -209,6 +221,7 @@ spacify' = foldl folder { res: [], allow_space: false } where
     Period -> Tuple false true
     Space -> Tuple false false
     Colon -> Tuple false true
+    Semicolon -> Tuple false true
     Enclitic _ -> Tuple false true
     Translation _ -> Tuple true true
   folder { res, allow_space } (Right w) =
@@ -230,7 +243,8 @@ punctuate = case _ of
   Space -> HH.text " "
   Newline -> HH.br_
   Colon -> HH.text ":"
-  Enclitic c -> HH.span [style (CSS.color gray)] [ HH.text c ]
+  Semicolon -> HH.text ";"
+  Enclitic c -> HH.span [latin, style (CSS.color (colorType Particle))] [ HH.text c ]
   Translation t -> HH.span [HP.class_ (wrap "translation")] [ HH.text t ]
 
 nonempty :: forall a. String -> (String -> a) -> Array a
@@ -265,8 +279,129 @@ sample { author, work, section, content, translation } = HH.section_
         [ HH.text ("(" <> section <> ")") ]
     atRow row = style (CSS.key (CSS.fromString "grid-row") (show (row+1)))
 
-sample1 :: Sample
-sample1 =
+passage :: Sample
+passage =
+  { author: "Boëthius"
+  , work: "Philosophy’s Consolation"
+  , section: "Metron 1.7"
+  , content, translation
+  } where
+  content =
+    [ [ adverb_ "Jam", verb_ "sciō", comma
+      , verb_ "inquit", comma
+      , noun_ "morbī", pronoun_ "tuī"
+      , pronoun_ "aliquam" @$ "indefinite", conjunction_ "vel"
+      , adjective_ "maximam", noun_ "causam", semicolon
+      ]
+    , [ pronoun_ "quid" @$ "interrogative", pronoun_ "ipse"
+      , verb_ "sīs", verb_ "nosse"
+      , verb_ "dēsistī", period
+      ]
+    , [ adverb_ "Quārē", adverb_ "plēnissimē"
+      , conjunction_ "vel"
+        , noun_ "ægritūdinis", pronoun_ "tuæ"
+      , noun_ "ratiōnem", conjunction_ "vel"
+      , noun_ "aditum", noun_ "reconciliandæ", noun_ "sospitātis"
+      , verb_ "invēnī", period
+      ]
+    , [ conjunction_ "Nam", conjunction_ "quoniam"
+      , pronoun_ "tuī", noun_ "obliviōne"
+      , verb_ "cōnfunderis", comma
+      , conjunction_ "et", noun_ "exsulem", pronoun_ "tē"
+      , conjunction_ "et", noun_ "exspoliātum"
+      , adjective_ "propriīs", adjective_ "bonīs" -- ???
+      , verb_ "esse", verb_ "doluistī", semicolon
+      ]
+    , [ conjunction_ "quoniam", adverb_ "vērō"
+      , pronoun_ "quis" @$ "interrogative", verb_ "sit"
+      , noun_ "rērum", noun_ "fīnis"
+      , verb_ "ignorās", comma
+      , adjective_ "nequam", noun_ "hominēs"
+      , conjunction_ "atque", adjective_ "nefāriōs"
+      , adjective_ "potentēs" @$ "substantive", adjective_ "fēlīcēs" @$ "substantive", _que
+      , verb_ "arbitrāris", semicolon
+      ]
+    , [ conjunction_ "quoniam", adverb_ "vērō"
+      , pronoun_ "quibus" @$ "interrogative", noun_ "gubernāculīs"
+      , noun_ "mundus", verb_ "regātur"
+      , verb_ "oblītus", verb_ "es", comma
+      , pronoun_ "hās", noun_ "fortunārum"
+      , noun_ "vicēs", verb_ "æstimās"
+      , preposition_ "sine", noun_ "rectōre"
+      , verb_ "fluitāre", colon
+      ]
+    , [ adjective_ "magnæ"
+        , adverb_ "nōn"
+          , preposition_ "ad", noun_ "morbum"
+        , particle_ "modo", comma
+        , adverb_ "vērum"
+          , preposition_ "ad", noun_ "interitum"
+        , adverb_ "quoque"
+      , noun_ "causæ", period ]
+    , [ conjunction_ "Sed"
+      , noun_ "sospitātis", noun_ "auctōrī" -- giver of health
+      , noun_ "grātēs", particle_ "quod" -- thanks that
+      , pronoun_ "tē", adverb_ "nōndum", adverb_ "tōtum" -- ???
+      , noun_ "nātūra", verb_ "dēstituit", period
+      ]
+    , [ verb_ "Habēmus"
+      , adjective_ "maximum", pronoun_ "tuae"
+      , noun_ "fōmitem", noun_ "salūtis"
+      , adjective_ "vēram", preposition_ "dē"
+      , noun_ "mundī", noun_ "gubernātiōne"
+      , noun_ "sententiam", comma
+      , conjunction_ "quod", pronoun_ "eam"
+      , adverb_ "nōn", noun_ "casuüm", noun_ "temeritātī"
+      , conjunction_ "sed", adjective_ "dīvīnæ", noun_ "ratiōnī"
+      , adjective_ "subditam", verb_ "crēdis", semicolon
+      ]
+    , [ noun_ "nihil", conjunction_ "igitur"
+      , verb_ "pertimescās", comma
+      , adverb_ "jam", pronoun_ "tibi"
+      , preposition_ "ex", pronoun_ "hāc"
+      , adjective_ "minima", noun_ "scintillula" -- ???
+      , adjective_ "vītālis", noun_ "calor"
+      , verb_ "illuxerit", period
+      ]
+    , [ conjunction_ "Sed", conjunction_ "quoniam"
+      , adjective_ "firmiōribus", noun_ "remediīs"
+      , adverb_ "nōndum", noun_ "tempus", verb_ "est", comma
+      , conjunction_ "et", pronoun_ "eam", noun_ "mentium"
+      , verb_ "cōnstat", verb_ "esse", noun_ "nātūram"
+      , conjunction_ "ut", conjunction_ "quotiēns"
+      , verb_ "abjecerint", adjective_ "vērās", comma
+      , adjective_ "falsīs", noun_ "opiniōnibus"
+      , verb_ "induantur", comma
+      , preposition_ "ex", pronoun_ "quibus" @$ "connecting relative", adjective_ "orta" @$ "participle"
+      , noun_ "perturbātiōnum", noun_ "caligō"
+      , adjective_ "vērum", pronoun_ "illum"
+      , verb_ "cōnfundit", noun_ "intuitum", comma
+      , pronoun_ "hanc", adverb_ "paulisper"
+      , adjective_ "lēnibus", noun_ "mediōcribus", _que, noun_ "fōmentis"
+      , verb_ "attenuāre", verb_ "temptābō", comma
+      , conjunction_ "ut", adjective_ "dīmōtīs" @$ "participle"
+      , adjective_ "fallācium", noun_ "affectiōnum"
+      , adjective_ "tenebrīs", noun_ "splendōrem"
+      , adjective_ "vēræ", noun_ "lūcis"
+      , verb_ "possīs", verb_ "agnōscere", period
+      ]
+    ]
+  translation = """
+  Now I know, Lady Philosophy says, another and a greatest cause of your illness;
+  you have stopped knowing what you yourself are.
+  Wherefore I have found most fully both the matter of your sickness and the approach of reconciling your safety.
+  For since you are confused by your forgetfulness, you suffered that you were exiled and despoiled by the good special thingies;
+      since you truly are ignorant of who is the end of things, you judge that men are worthless, and the powerful and lucky are execrable;
+      since you truly have forgotten by which governors the world is ruled, you estimate that these changes of fortunes flow without a guide:
+  these are the great causes not only of your illness but also of your overthrow.
+  .......
+  We have the greatest tindling for your health – true opinion of the governor of the world – because you believe that it does not serve chance of disasters by the thought of divinity;
+  therefore may you not fear greatly anything, already to you will have shined the glow of life from this smallest sparklet.
+  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the contemplated truth, I will try to lessen this for a little bit with soft and more moderate nourishments, so that you may recognize the splendor of true light with the darknesses of fallacious affections shed off.
+  """
+
+metron :: Sample
+metron =
   { author: "Boëthius"
   , work: "Philosophy’s Consolation"
   , section: "Metron 1.7"
@@ -280,18 +415,18 @@ sample1 =
 
     , [ conjunction_ "sī" @= "if", noun_ "mare" @= "sea" @$ "accusative object", verb_ "volvēns" @= "rolling" @$ "active" ]
     , [ adjective_ "turbidus" @= "turbulent", noun_ "Auster" @= "the South Wind" ]
-    , [ verb_ "misceat" @= "stir up", noun_ "aestum" @= "surge" @$ "accusative object", comma ]
+    , [ verb_ "misceat" @= "stir up", noun_ "æstum" @= "surge" @$ "accusative object", comma ]
     , [ adjective_ "vitrea" @= "glassy", adverb_ "dūdum" @= "just now" ]
     , [ adverb_ "par" @= "equally", _que, adjective_ "serēnīs" @= "tranquil" ]
     , [ noun_ "unda" @= "wave" @$ "nominative subject", noun_ "diēbus" @= "days" ]
     , [ adverb_ "mox" @= "soon", adjective_ "resolūtō" @= "loosened" ]
-    , [ adjective_ "sordida" @= "foul", noun_ "caenō" @= "mud" @$ "ablative of means" ]
+    , [ adjective_ "sordida" @= "foul", noun_ "cænō" @= "mud" @$ "ablative of means" ]
     , [ noun_ "vīsibus" @= "sight(s)", verb_ "obstat" @= "blocks", comma ]
 
     , [ pronoun_ "quīque" @= "whatever" @$ "nominative subject", verb_ "vagātur" @= "wanders" ]
     , [ noun_ "montibus" @= "mountains", adjective_ "altīs" @= "tall" ]
     , [ adjective_ "dēfluus" @= "flowing down" @$ "ablative of place from which", noun_ "amnis" @= "river" @$ "nominative subject" ]
-    , [ adverb_ "saepe" @= "often", verb_ "restitit" @= "remains" ]
+    , [ adverb_ "sæpe" @= "often", verb_ "restitit" @= "remains" ]
     , [ noun_ "rūpe" @= "cliff", adjective_ "solūtī" @= "loose" ]
     , [ noun_ "ōbice" @< "ōbex" @= "obstacle" @$ "ablative of place where", noun_ "saxī" @= "rock", period ]
 
@@ -307,7 +442,7 @@ sample1 =
 
     , [ adjective_ "nūbila" @= "cloudy" @$ "predicate", noun_ "mēns" @= "mind" @$ "nominative subject", verb_ "est" @= "is" ]
     , [ adjective_ "vincta" @= "bound" @$ "predicate", _que, noun_ "frēnīs" @= "bridle" @$ "ablative of instrument" ]
-    , [ pronoun_ "haec" @= "these things" @$ "nominative subject", adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
+    , [ pronoun_ "hæc" @= "these things" @$ "nominative subject", adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
     ]
   translation = """
   Through black clouds
@@ -364,9 +499,15 @@ body = H.lifecycleParentComponent
     render :: State -> H.ParentHTML Query ChildrenQuery ChildSlot m
     render { glossing } =
       HH.div [ HP.id_ "parent" ]
-        [ sidebar (glossing <#> snd)
-        , HH.div [] [ glosser <$> sample sample1 ]
+        [ HH.p [ HP.id_ "key" ] $ [ HH.text "Color Key: " ] <> legend
+        , sidebar (glossing <#> snd)
+        , HH.div [] [ glosser <$> sample metron ]
+        , HH.div [] [ glosser <$> sample passage ]
         ]
+
+    legend = intercalate [ HH.text ", " ] $ map pure $
+      [ Verb, Adverb, Conjunction, Noun, Pronoun, Adjective, Particle ]
+      <#> \v -> HH.span [ style (CSS.color (colorType v)) ] [ HH.text (show v) ]
 
     glosser = H.action <<< Gloss
 

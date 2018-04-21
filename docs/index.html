@@ -1,6 +1,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
+  <title>Translatinator</title>
   <script src="index.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Simonetta:400,400i,900,900i" rel="stylesheet">
   <style>
@@ -51,7 +52,7 @@
       font-weight: normal;
       margin-left: 1em;
     }
-    .help {
+    #help, #key {
       font-family: "Simonetta";
       font-size: 18px;
     }
@@ -73,12 +74,12 @@
     }
     .translation-parent {
       display: grid;
-      grid-template-columns: 40% 40%;
+      grid-template-columns: 35% 40%;
     }
     #sidebar {
       position: fixed;
       /*float: right;*/
-      width: 30%;
+      width: 20%;
       text-align: right;
       right: 20px;
     }
@@ -126,7 +127,7 @@
 </head>
 <body>
   <h1>Translatinator</h1>
-  <p class="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel).</p>
+  <p id="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel).</p>
   <div id="app"></div>
 </body>
 </html>
