@@ -76,6 +76,17 @@
       display: grid;
       grid-template-columns: 35% 40%;
     }
+    .translation-parent > p {
+      padding: 0 4px;
+      margin-top: -4px;
+    }
+    .translation-parent > p {
+      line-height: 1.7;
+    }
+    .translation-parent > p:lang(la),
+    .translation-parent > p :lang(la) {
+      line-height: 1.3;
+    }
     #sidebar {
       position: fixed;
       /*float: right;*/
@@ -117,11 +128,33 @@
     .adjective {
       color: rgb(39, 212, 41);
     }
+    .notated {
+      text-decoration: gray solid underline;
+    }
     .subject {
       text-decoration: orange dotted underline;
     }
     .object {
       text-decoration: purple dotted underline;
+    }
+    .subject.notated {
+      text-decoration: orange solid underline;
+    }
+    .object.notated {
+      text-decoration: purple solid underline;
+    }
+    #images {
+      display: flex;
+      width: 100%;
+    }
+    #images > a {
+      display: inline-block;
+      flex: 25%;
+      height: 260px;
+    }
+    #images > a > img {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -129,5 +162,11 @@
   <h1>Translatinator</h1>
   <p id="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel).</p>
   <div id="app"></div>
+  <div id="images">
+    <a href="https://en.wikipedia.org/wiki/Magellanic_Clouds"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg/1600px-Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg"/></a>
+    <a href="https://commons.m.wikimedia.org/wiki/File:Caribbean_Sea_-_Long_Exposure.jpg"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Caribbean_Sea_-_Long_Exposure.jpg/800px-Caribbean_Sea_-_Long_Exposure.jpg"/></a>
+    <a href="https://en.wikipedia.org/wiki/Northeaster_(painting)"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Northeaster_by_Winslow_Homer_1895.jpg/800px-Northeaster_by_Winslow_Homer_1895.jpg"/></a>
+    <a href="https://en.wikipedia.org/wiki/Ilfis_(river)"><img src="https://upload.wikimedia.org/wikipedia/commons/b/bb/Ilfis_en_Langau_en_Emme-Valo_078.jpg"/></a>
+  </div>
 </body>
 </html>

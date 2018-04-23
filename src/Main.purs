@@ -39,6 +39,7 @@ type Word =
   , alternate :: String
   , origin :: String
   , role :: String
+  , notes :: String
   }
 data Punctuation = Comma | Newline | Space | Period | Colon | Semicolon
   | Enclitic String | Translation String
@@ -85,7 +86,7 @@ lit_ :: String -> Entity
 lit_ = Left <<< Translation
 
 mkword :: WordType -> String -> Word
-mkword word_type = { href: "", def: "", origin: "", alternate: "", role: "", word_type, text: _ }
+mkword word_type = { href: "", def: "", origin: "", alternate: "", role: "", notes: "", word_type, text: _ }
 
 addef :: Entity -> String -> Entity
 addef w def = w <#> _ { def = def }
@@ -98,6 +99,14 @@ infixl 9 as as @$
 from :: Entity -> String -> Entity
 from w origin = w <#> _ { origin = origin }
 infixl 9 from as @<
+
+sive :: Entity -> String -> Entity
+sive w alternate = w <#> _ { alternate = alternate }
+infixl 9 sive as @>
+
+nota :: Entity -> String -> Entity
+nota w notes = w <#> _ { notes = notes }
+infixl 9 nota as @..
 
 verb :: String -> Word
 verb = mkword Verb
@@ -199,10 +208,10 @@ colorType = case _ of
   Preposition -> rgb 142 44 171
 
 colorize' :: forall o w. Array (HH.IProp HTMLspan o) -> Word -> HH.HTML w o
-colorize' props { word_type, text, role } =
+colorize' props { word_type, text, role, notes } =
   let
     couleur = CSS.color $ CSS.darken 0.05 $ colorType word_type
-    klass = HP.class_ $ wrap role
+    klass = HP.class_ $ wrap $ role <> (if notes /= "" then " notated" else "")
   in HH.span (props <> [latin, klass, style couleur])
     [ HH.text text ]
 
@@ -283,7 +292,7 @@ passage :: Sample
 passage =
   { author: "Boëthius"
   , work: "Philosophy’s Consolation"
-  , section: "Metron 1.7"
+  , section: "1 pr. 6.17–21"
   , content, translation
   } where
   content =
@@ -294,39 +303,41 @@ passage =
       , adjective_ "maximam", noun_ "causam", semicolon
       ]
     , [ pronoun_ "quid" @$ "interrogative", pronoun_ "ipse"
-      , verb_ "sīs", verb_ "nosse"
-      , verb_ "dēsistī", period
+      , verb_ "sīs", verb_ "nōsse" @> "(g)nōscere" @= "know"
+      , verb_ "dēsistī" @= "stop", period
       ]
-    , [ adverb_ "Quārē", adverb_ "plēnissimē"
+    , [ adverb_ "Quārē", adverb_ "plēnissimē" @$ "superlative"
       , conjunction_ "vel"
         , noun_ "ægritūdinis", pronoun_ "tuæ"
-      , noun_ "ratiōnem", conjunction_ "vel"
-      , noun_ "aditum", noun_ "reconciliandæ", noun_ "sospitātis"
+      , noun_ "ratiōnem" @= "account", conjunction_ "vel" -- ???
+      , noun_ "aditum", noun_ "reconciliandæ" @$ "gerundive"
+      , noun_ "sospitātis" @= "safety, health, welfare"
       , verb_ "invēnī", period
       ]
     , [ conjunction_ "Nam", conjunction_ "quoniam"
-      , pronoun_ "tuī", noun_ "obliviōne"
+      , pronoun_ "tuī", noun_ "oblīviōne"
       , verb_ "cōnfunderis", comma
-      , conjunction_ "et", noun_ "exsulem", pronoun_ "tē"
-      , conjunction_ "et", noun_ "exspoliātum"
-      , adjective_ "propriīs", adjective_ "bonīs" -- ???
-      , verb_ "esse", verb_ "doluistī", semicolon
+      , conjunction_ "et", noun_ "exsulem" @< "ex(s)ul" @= "exile", pronoun_ "tē"
+      , conjunction_ "et", adjective_ "exspoliātum" @= "despoiled"
+      , adjective_ "prōpriīs" @= "one’s own, personal; also, property"
+      , adjective_ "bonīs" @= "goods" @$ "substantive" @.. "c.f. English de propriis bonis"
+      , verb_ "esse", verb_ "doluistī" @= "pain", semicolon
       ]
     , [ conjunction_ "quoniam", adverb_ "vērō"
       , pronoun_ "quis" @$ "interrogative", verb_ "sit"
       , noun_ "rērum", noun_ "fīnis"
       , verb_ "ignorās", comma
-      , adjective_ "nequam", noun_ "hominēs"
-      , conjunction_ "atque", adjective_ "nefāriōs"
+      , adjective_ "nequam" @= "worthless, wretched" @$ "indeclinable", noun_ "hominēs"
+      , conjunction_ "atque", adjective_ "nefāriōs" @= "execrable, abominable, nefarious" @$ "predicate"
       , adjective_ "potentēs" @$ "substantive", adjective_ "fēlīcēs" @$ "substantive", _que
       , verb_ "arbitrāris", semicolon
       ]
     , [ conjunction_ "quoniam", adverb_ "vērō"
-      , pronoun_ "quibus" @$ "interrogative", noun_ "gubernāculīs"
+      , pronoun_ "quibus" @$ "interrogative", noun_ "gubernāculīs" @= "government, guidance; lit. rudder"
       , noun_ "mundus", verb_ "regātur"
       , verb_ "oblītus", verb_ "es", comma
       , pronoun_ "hās", noun_ "fortunārum"
-      , noun_ "vicēs", verb_ "æstimās"
+      , noun_ "vicēs", verb_ "æstimās" @= "estimate, reckon"
       , preposition_ "sine", noun_ "rectōre"
       , verb_ "fluitāre", colon
       ]
@@ -337,17 +348,19 @@ passage =
         , adverb_ "vērum"
           , preposition_ "ad", noun_ "interitum"
         , adverb_ "quoque"
-      , noun_ "causæ", period ]
+      , noun_ "causæ", period
+      ]
     , [ conjunction_ "Sed"
-      , noun_ "sospitātis", noun_ "auctōrī" -- giver of health
-      , noun_ "grātēs", particle_ "quod" -- thanks that
-      , pronoun_ "tē", adverb_ "nōndum", adverb_ "tōtum" -- ???
-      , noun_ "nātūra", verb_ "dēstituit", period
+      , let note = "see above, the same safety which Lady Philosophy promised"
+      in noun_ "sospitātis" @.. note, noun_ "auctōrī"
+      , noun_ "grātēs" @= "thanks (towards the divine)", particle_ "quod" -- thanks that
+      , pronoun_ "tē", adverb_ "nōndum" @= "not yet", adverb_ "tōtum" @= "wholly"
+      , noun_ "nātūra", verb_ "dēstituit" @= "forsake", period
       ]
     , [ verb_ "Habēmus"
       , adjective_ "maximum", pronoun_ "tuae"
-      , noun_ "fōmitem", noun_ "salūtis"
-      , adjective_ "vēram", preposition_ "dē"
+      , noun_ "fōmitem", noun_ "salūtis" @.. "c.f. sospitātis"
+      , adjective_ "vēram" @= "true", preposition_ "dē"
       , noun_ "mundī", noun_ "gubernātiōne"
       , noun_ "sententiam", comma
       , conjunction_ "quod", pronoun_ "eam"
@@ -356,11 +369,11 @@ passage =
       , adjective_ "subditam", verb_ "crēdis", semicolon
       ]
     , [ noun_ "nihil", conjunction_ "igitur"
-      , verb_ "pertimescās", comma
+      , verb_ "pertimescās" @= "fear greatly" @$ "optative subjunctive", comma
       , adverb_ "jam", pronoun_ "tibi"
       , preposition_ "ex", pronoun_ "hāc"
-      , adjective_ "minima", noun_ "scintillula" -- ???
-      , adjective_ "vītālis", noun_ "calor"
+      , adjective_ "minimā", noun_ "scintillulā" @= "sparklet"
+      , adjective_ "vītālis", noun_ "calor" @= "glow"
       , verb_ "illuxerit", period
       ]
     , [ conjunction_ "Sed", conjunction_ "quoniam"
@@ -376,28 +389,30 @@ passage =
       , noun_ "perturbātiōnum", noun_ "caligō"
       , adjective_ "vērum", pronoun_ "illum"
       , verb_ "cōnfundit", noun_ "intuitum", comma
-      , pronoun_ "hanc", adverb_ "paulisper"
+      ]
+    , [ pronoun_ "hanc", adverb_ "paulisper"
       , adjective_ "lēnibus", noun_ "mediōcribus", _que, noun_ "fōmentis"
       , verb_ "attenuāre", verb_ "temptābō", comma
       , conjunction_ "ut", adjective_ "dīmōtīs" @$ "participle"
       , adjective_ "fallācium", noun_ "affectiōnum"
-      , adjective_ "tenebrīs", noun_ "splendōrem"
+      , adjective_ "tenebrīs" @= "pl. darkness, gloom", noun_ "splendōrem"
       , adjective_ "vēræ", noun_ "lūcis"
       , verb_ "possīs", verb_ "agnōscere", period
       ]
     ]
   translation = """
-  Now I know, Lady Philosophy says, another and a greatest cause of your illness;
+  Now I know, Lady Philosophy says, another – the greatest – cause of your illness;
   you have stopped knowing what you yourself are.
-  Wherefore I have found most fully both the matter of your sickness and the approach of reconciling your safety.
-  For since you are confused by your forgetfulness, you suffered that you were exiled and despoiled by the good special thingies;
-      since you truly are ignorant of who is the end of things, you judge that men are worthless, and the powerful and lucky are execrable;
-      since you truly have forgotten by which governors the world is ruled, you estimate that these changes of fortunes flow without a guide:
+  Wherefore I have found most fully both an account of your sickness and an approach for reconciling your safety.
+  For since you are confused by forgetfulness of yourself, you feel pain that you both are an exile and are despoiled of your own goods;
+      since you truly are ignorant of who the end of things is, you judge that men are worthless, and the powerful and lucky are execrable;
+      since you truly have forgotten by what governments the world is ruled, you reckon these changes of fortunes flow without a guide:
   these are the great causes not only of your illness but also of your overthrow.
-  .......
+  But give thanks to author of your safety, because nature has not yet wholly forsaken you.
   We have the greatest tindling for your health – true opinion of the governor of the world – because you believe that it does not serve chance of disasters by the thought of divinity;
-  therefore may you not fear greatly anything, already to you will have shined the glow of life from this smallest sparklet.
-  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the contemplated truth, I will try to lessen this for a little bit with soft and more moderate nourishments, so that you may recognize the splendor of true light with the darknesses of fallacious affections shed off.
+  therefore, may you not fear anything greatly, already to you will have shined the glow of life from this smallest sparklet.
+  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the contemplated truth,
+  I will try to lessen this for a little bit with soft and more moderate nourishments, so that you may recognize the splendor of true light, with the gloom of fallacious affections shed off.
   """
 
 metron :: Sample
@@ -426,7 +441,7 @@ metron =
     , [ pronoun_ "quīque" @= "whatever" @$ "nominative subject", verb_ "vagātur" @= "wanders" ]
     , [ noun_ "montibus" @= "mountains", adjective_ "altīs" @= "tall" ]
     , [ adjective_ "dēfluus" @= "flowing down" @$ "ablative of place from which", noun_ "amnis" @= "river" @$ "nominative subject" ]
-    , [ adverb_ "sæpe" @= "often", verb_ "restitit" @= "remains" ]
+    , [ adverb_ "sæpe" @= "often", verb_ "restitit" @= "stops behind, remains" ]
     , [ noun_ "rūpe" @= "cliff", adjective_ "solūtī" @= "loose" ]
     , [ noun_ "ōbice" @< "ōbex" @= "obstacle" @$ "ablative of place where", noun_ "saxī" @= "rock", period ]
 
@@ -456,15 +471,15 @@ metron =
   just now glassy
   (as on calm days),
   soon foul with
-  loosened mud
+  loosened mud,
   blocks sight.
   Whatever river
   wanders flowing down
   the tall mountains
-  often remains
-  at an obstacle,
-  a cliff of loose rock
-  Tu also if you want
+  often stops
+  behind an obstacle,
+  a cliff of loose rock.
+  You also, if you want
   to discern the truth
   in a clear light,
   to seize upon a path
@@ -501,12 +516,12 @@ body = H.lifecycleParentComponent
       HH.div [ HP.id_ "parent" ]
         [ HH.p [ HP.id_ "key" ] $ [ HH.text "Color Key: " ] <> legend
         , sidebar (glossing <#> snd)
-        , HH.div [] [ glosser <$> sample metron ]
         , HH.div [] [ glosser <$> sample passage ]
+        , HH.div [] [ glosser <$> sample metron ]
         ]
 
     legend = intercalate [ HH.text ", " ] $ map pure $
-      [ Verb, Adverb, Conjunction, Noun, Pronoun, Adjective, Particle ]
+      [ Verb, Adverb, Conjunction, Preposition, Noun, Pronoun, Adjective, Particle ]
       <#> \v -> HH.span [ style (CSS.color (colorType v)) ] [ HH.text (show v) ]
 
     glosser = H.action <<< Gloss
@@ -525,6 +540,7 @@ body = H.lifecycleParentComponent
           , nonempty glossed.def \v ->
               HH.p [HP.class_ (wrap "translation")]
                 [ HH.text $ "“" <> v <> "”" ]
+          , nonempty glossed.notes p
           , nonempty glossed.role p
           ]
 
