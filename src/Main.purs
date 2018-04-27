@@ -9,13 +9,16 @@ import Control.Monad.Eff (Eff)
 import DOM.HTML.Indexed (HTMLspan)
 import DOM.Node.ParentNode (QuerySelector(..))
 import Data.Array (intercalate, mapWithIndex)
+import Data.Array as Array
 import Data.Const (Const)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, traverse_)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Data.List as List
 import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
+import Data.Bifunctor (lmap)
 import Data.String as String
 import Data.Tuple (Tuple(..), snd)
 import Halogen as H
@@ -41,6 +44,7 @@ type Word =
   , role :: String
   , notes :: String
   }
+type Annote = Tuple String String
 data Punctuation = Comma | Newline | Space | Period | Colon | Semicolon
   | Enclitic String | Translation String
 derive instance eqPunctuation :: Eq Punctuation
@@ -263,7 +267,49 @@ nonempty v f = [f v]
 split :: String -> Array String
 split = String.trim >>> String.split (String.Pattern "\n")
 
-sample :: forall w. Sample -> HH.HTML w (Tuple Boolean (Maybe Word))
+search :: Char -> String -> Tuple String String
+search c s = Tuple
+  (String.takeWhile (_ /= c) s)
+  (String.drop 1 $ String.dropWhile (_ /= c) s)
+
+parseTrans :: String -> List.List Annote
+parseTrans "" = List.Nil
+parseTrans s0 = go s0
+  where
+    sing = Tuple ""
+    consingif "" = id
+    consingif s = List.Cons (sing s)
+    go s =
+      let Tuple plain remaining = search '{' s in
+      case remaining of
+        "" ->
+          case plain of
+            "" -> List.Nil
+            _ -> List.singleton $ sing plain
+        _ ->
+          let
+            Tuple trans left = search '|' remaining
+            Tuple annote rest = lmap String.trim $ search '}' left
+            consing = case trans of
+              "" -> id
+              _ -> List.Cons (Tuple annote trans)
+          in consingif plain $ consing $ go rest
+
+
+renderTrans :: forall w. Annote -> HH.HTML w (Tuple Boolean (Maybe Annote))
+renderTrans (Tuple "" trans) = HH.text trans
+renderTrans annote@(Tuple _ trans) =
+  HH.span
+    [ HP.class_ (wrap "annotated")
+    , HE.onClick (pure $ pure $ Tuple true $ Just annote)
+    , HE.onMouseOver (pure $ pure $ Tuple false $ Just annote)
+    , HE.onMouseOut (pure $ pure $ Tuple false Nothing)
+    ] [ HH.text trans ]
+
+renderTransBits :: forall w. List.List Annote -> Array (HH.HTML w (Tuple Boolean (Maybe Annote)))
+renderTransBits = Array.fromFoldable >>> map renderTrans
+
+sample :: forall w. Sample -> HH.HTML w (Tuple Boolean (Maybe (Either Word Annote)))
 sample { author, work, section, content, translation } = HH.section_
   [ HH.h2_ $ join [ [ HH.text (author <> ": " <> work) ], sec ]
   , HH.div [ HP.class_ (wrap "translation-parent") ] $ join
@@ -273,16 +319,17 @@ sample { author, work, section, content, translation } = HH.section_
           Left p -> punctuate p
           Right w -> w # colorize'
             [ HP.title w.role
-            , HE.onClick (pure $ pure $ Tuple true $ pure w)
-            , HE.onMouseOver (pure $ pure $ Tuple false $ pure w)
+            , HE.onClick (pure $ pure $ Tuple true $ pure $ Left w)
+            , HE.onMouseOver (pure $ pure $ Tuple false $ pure $ Left w)
             , HE.onMouseOut (pure $ pure $ Tuple false $ Nothing)
             ]
-    , split translation
+    , translated
       # mapWithIndex \row ->
-        HH.p [atRow row] <<< pure <<< HH.text <<< (<>) " "
+        HH.p [atRow row] <<< map (map (map (map Right)))
     ]
   ]
   where
+    translated = (renderTransBits <<< parseTrans) <$> split translation
     sec =
       nonempty section $ pure $ HH.h3 [ HP.class_ (wrap "section") ]
         [ HH.text ("(" <> section <> ")") ]
@@ -346,7 +393,7 @@ passage =
           , preposition_ "ad", noun_ "morbum"
         , particle_ "modo", comma
         , adverb_ "vērum"
-          , preposition_ "ad", noun_ "interitum"
+          , preposition_ "ad", noun_ "interitum" @= "ruin"
         , adverb_ "quoque"
       , noun_ "causæ", period
       ]
@@ -382,13 +429,13 @@ passage =
       , conjunction_ "et", pronoun_ "eam", noun_ "mentium"
       , verb_ "cōnstat", verb_ "esse", noun_ "nātūram"
       , conjunction_ "ut", conjunction_ "quotiēns"
-      , verb_ "abjecerint", adjective_ "vērās", comma
+      , verb_ "abjecerint", adjective_ "vērās" @.. "s.c. opiniōnēs", comma
       , adjective_ "falsīs", noun_ "opiniōnibus"
       , verb_ "induantur", comma
-      , preposition_ "ex", pronoun_ "quibus" @$ "connecting relative", adjective_ "orta" @$ "participle"
+      , preposition_ "ex", pronoun_ "quibus" @$ "relative", adjective_ "orta" @$ "participle"
       , noun_ "perturbātiōnum", noun_ "caligō"
       , adjective_ "vērum", pronoun_ "illum"
-      , verb_ "cōnfundit", noun_ "intuitum", comma
+      , verb_ "cōnfundit", adjective_ "intuitum", comma
       ]
     , [ pronoun_ "hanc", adverb_ "paulisper"
       , adjective_ "lēnibus", noun_ "mediōcribus", _que, noun_ "fōmentis"
@@ -401,17 +448,17 @@ passage =
       ]
     ]
   translation = """
-  Now I know, Lady Philosophy says, another – the greatest – cause of your illness;
-  you have stopped knowing what you yourself are.
-  Wherefore I have found most fully both an account of your sickness and an approach for reconciling your safety.
-  For since you are confused by forgetfulness of yourself, you feel pain that you both are an exile and are despoiled of your own goods;
+  Now I know, {Lady Philosophy|[implied] The central figure speaking to Boëthius in this work} says, another – the greatest – cause of your illness;
+  {you have stopped knowing what you yourself are|reminiscent of “know thyself”, common in the ancient world}.
+  Wherefore I have found most fully both an {account of your sickness|Lady Philosophy will explain why Boëthius is “sick”} and an {approach for reconciling your safety|And she will provide a solution}.
+  For since you are confused by forgetfulness of yourself, you feel pain {that you both are an exile and are despoiled of your own goods|Wikipedia notes that, “Boëthius was at the very heights of power in Rome and was brought down by treachery”; it seems that he instinctively blames others for this, but Lady Philosophy guides him towards another course};
       since you truly are ignorant of who the end of things is, you judge that men are worthless, and the powerful and lucky are execrable;
       since you truly have forgotten by what governments the world is ruled, you reckon these changes of fortunes flow without a guide:
-  these are the great causes not only of your illness but also of your overthrow.
-  But give thanks to author of your safety, because nature has not yet wholly forsaken you.
-  We have the greatest tindling for your health – true opinion of the governor of the world – because you believe that it does not serve chance of disasters by the thought of divinity;
-  therefore, may you not fear anything greatly, already to you will have shined the glow of life from this smallest sparklet.
-  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the contemplated truth,
+  these are the great causes not only of your illness but also of your ruin.
+  But give thanks to {author of your safety|i.e. Lady Philosophy}, because nature has not yet wholly forsaken you.
+  We have {the greatest tindling for your health|Now comes her solution} – a true opinion of the governance of the world – because you believe that {it|i.e. the governance of the world} is not subjected by the chance of disasters but by the thought of divinity;
+  therefore, may you not fear anything greatly, {already|i.e. as soon as he stops being afraid} to you the glow of life will have shined from this smallest sparklet.
+  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the truth being contemplated,
   I will try to lessen this for a little bit with soft and more moderate nourishments, so that you may recognize the splendor of true light, with the gloom of fallacious affections shed off.
   """
 
@@ -447,7 +494,7 @@ metron =
 
     , [ pronoun_ "tū" @= "you", adverb_ "quoque" @= "also", conjunction_ "sī" @= "if", verb_ "vīs" @= "want" ]
     , [ noun_ "lūmine" @= "light", adjective_ "clārō" @= "clear" ]
-    , [ verb_ "cernere" @= "discern", noun_ "vērum" @= "the truth" @$ "accusative object" ]
+    , [ verb_ "cernere" @= "discern", noun_ "vērum" @= "the truth" @$ "substantive accusative object" ]
     , [ noun_ "trāmite" @= "riverbed", adjective_ "rēctō" @= "straight" ]
     , [ verb_ "carpere" @= "seize", noun_ "callem" @= "path" @$ "accusative object", colon ]
     , [ noun_ "gaudia" @= "joys" @$ "accusative object", verb_ "pelle" @= "drive away", comma ]
@@ -494,11 +541,11 @@ metron =
   """
 
 type State =
-  { glossing :: Maybe (Tuple Boolean Word)
+  { glossing :: Maybe (Tuple Boolean (Either Word Annote))
   }
 data Query a
   = DoNothing a
-  | Gloss (Tuple Boolean (Maybe Word)) a
+  | Gloss (Tuple Boolean (Maybe (Either Word Annote))) a
 type ChildSlot = Void
 type ChildrenQuery = Const Void
 
@@ -532,8 +579,13 @@ body = H.lifecycleParentComponent
     sidebar glossing = HH.div
       [ HP.id_ "sidebar" ]
       case glossing of
-        Nothing -> [ HH.text "" ]
-        Just glossed -> join
+        Nothing -> []
+        Just (Right (Tuple "" trans)) -> []
+        Just (Right (Tuple annote trans)) ->
+          [ HH.h4_ [ HH.text trans ]
+          , HH.span [ HP.class_ (wrap "annotation") ] [ HH.text annote ]
+          ]
+        Just (Left glossed) -> join
           [ pure $ HH.h3_ [ colorize glossed ]
           , nonempty glossed.alternate (spla <<< append " = ")
           , nonempty glossed.origin (spla <<< append " < ")

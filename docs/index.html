@@ -56,6 +56,9 @@
       font-family: "Simonetta";
       font-size: 18px;
     }
+    #help {
+      width: 70%;
+    }
     :lang(la) {
       font-family: "Junicode";
       font-size: 117%;
@@ -89,14 +92,26 @@
     }
     #sidebar {
       position: fixed;
-      /*float: right;*/
       width: 20%;
       text-align: right;
       right: 20px;
+      top: 25px;
+      bottom: 0px;
+      overflow-y: auto;
     }
     #sidebar h3 {
       font-size: 40px;
       margin-bottom: 0;
+    }
+    #sidebar h4 {
+      font-size: 36px;
+      font-weight: normal;
+      font-style: italic;
+      margin-bottom: 0;
+    }
+    #sidebar .annotation::before {
+      content: "▸ ";
+      color: purple;
     }
     #sidebar {
       font-size: 36px;
@@ -127,6 +142,9 @@
     }
     .adjective {
       color: rgb(39, 212, 41);
+    }
+    .annotated {
+      text-decoration: purple solid underline;
     }
     .notated {
       text-decoration: gray solid underline;
@@ -160,7 +178,7 @@
 </head>
 <body>
   <h1>Translatinator</h1>
-  <p id="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel).</p>
+  <p id="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel). Same dealio for underlined bits of the translation; scroll for the longer annotations.</p>
   <div id="app"></div>
   <div id="images">
     <a href="https://en.wikipedia.org/wiki/Magellanic_Clouds"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg/1600px-Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg"/></a>
