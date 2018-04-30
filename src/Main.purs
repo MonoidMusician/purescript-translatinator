@@ -58,6 +58,7 @@ type Sample =
   { author :: String
   , work :: String
   , section :: String
+  , introduction :: String
   , content :: Codex
   , translation :: String
   }
@@ -310,8 +311,16 @@ renderTransBits :: forall w. List.List Annote -> Array (HH.HTML w (Tuple Boolean
 renderTransBits = Array.fromFoldable >>> map renderTrans
 
 sample :: forall w. Sample -> HH.HTML w (Tuple Boolean (Maybe (Either Word Annote)))
-sample { author, work, section, content, translation } = HH.section_
+sample { author, work, section, introduction, content, translation } = HH.section_
   [ HH.h2_ $ join [ [ HH.text (author <> ": " <> work) ], sec ]
+  , HH.div [ HP.class_ (wrap "introduction" ) ]
+    ( split introduction <#>
+        HH.p_ <<< parseTrans >>> Array.fromFoldable >>>
+          map case _ of
+            Tuple "" t -> HH.text t
+            Tuple href name ->
+              HH.a [ HP.href href ] [ HH.text name ]
+    )
   , HH.div [ HP.class_ (wrap "translation-parent") ] $ join
     [ map spacify content
       # mapWithIndex \row ->
@@ -340,8 +349,13 @@ passage =
   { author: "Boëthius"
   , work: "Philosophy’s Consolation"
   , section: "1 pr. 6.17–21"
-  , content, translation
+  , introduction, content, translation
   } where
+  introduction = """
+  These are two related excerpts from a work of Anicius Manlius Severinus Boëthius. The central figure in the work is Lady Philosophy, a personification of philosophical arguments which Boëthius addresses to his own character.
+  This was written while Boëthius was awaiting execution; formerly part of the government of the {Ostrogothic King Theodoric the Great|https://en.wikipedia.org/wiki/Theoderic_the_Great}, he was implicated (falsely, he claims!) in treasonous acts, and sentenced to death. This work is his way of dealing with death, wrestling with ideas of (mis)fortune, chance, and justice as well; addressing these however through philosophy, not religion.
+  This prose passage is part of Lady Philosophy’s logical argument towards him.
+  """
   content =
     [ [ adverb_ "Jam", verb_ "sciō", comma
       , verb_ "inquit", comma
@@ -367,7 +381,7 @@ passage =
       , conjunction_ "et", noun_ "exsulem" @< "ex(s)ul" @= "exile", pronoun_ "tē"
       , conjunction_ "et", adjective_ "exspoliātum" @= "despoiled"
       , adjective_ "prōpriīs" @= "one’s own, personal; also, property"
-      , adjective_ "bonīs" @= "goods" @$ "substantive" @.. "c.f. English de propriis bonis"
+      , adjective_ "bonīs" @= "goods" @$ "substantive" @.. "cf. English de propriis bonis"
       , verb_ "esse", verb_ "doluistī" @= "pain", semicolon
       ]
     , [ conjunction_ "quoniam", adverb_ "vērō"
@@ -406,7 +420,7 @@ passage =
       ]
     , [ verb_ "Habēmus"
       , adjective_ "maximum", pronoun_ "tuae"
-      , noun_ "fōmitem", noun_ "salūtis" @.. "c.f. sospitātis"
+      , noun_ "fōmitem", noun_ "salūtis" @= "health, safety, salvation" @.. "cf. sospitātis, as opposed to morbus"
       , adjective_ "vēram" @= "true", preposition_ "dē"
       , noun_ "mundī", noun_ "gubernātiōne"
       , noun_ "sententiam", comma
@@ -449,7 +463,7 @@ passage =
     ]
   translation = """
   Now I know, {Lady Philosophy|[implied] The central figure speaking to Boëthius in this work} says, another – the greatest – cause of your illness;
-  {you have stopped knowing what you yourself are|reminiscent of “know thyself”, common in the ancient world}.
+  {you have stopped knowing what you yourself are|reminiscent of “know thyself”, a common refrain in ancient Greece}.
   Wherefore I have found most fully both an {account of your sickness|Lady Philosophy will explain why Boëthius is “sick”} and an {approach for reconciling your safety|And she will provide a solution}.
   For since you are confused by forgetfulness of yourself, you feel pain {that you both are an exile and are despoiled of your own goods|Wikipedia notes that, “Boëthius was at the very heights of power in Rome and was brought down by treachery”; it seems that he instinctively blames others for this, but Lady Philosophy guides him towards another course};
       since you truly are ignorant of who the end of things is, you judge that men are worthless, and the powerful and lucky are execrable;
@@ -467,10 +481,14 @@ metron =
   { author: "Boëthius"
   , work: "Philosophy’s Consolation"
   , section: "Metron 1.7"
-  , content, translation
+  , introduction, content, translation
   } where
+  introduction = """
+  This poem (a metron) presents an extended metaphor, elaborating on Lady Philosophy’s view of Boëthius’ state of mind through images of nature: dark clouds, a sea riled up, muddied, a river blocked at an obstacle. The metaphor is drawn up more explicitly at the shift in the poem (“tū quoque / You also”), where Lady Philosophy again addresses Boëthius and his mental state directly.
+  Her advice is non-intuitive, for she suggests getting rid of both positive and negative emotions: joy and fear, hope as well as grief. But perhaps this is exactly her point: if one is not subject to emotions, there will be no disappointment. (But again, Boëthius may be inserting elements of satire here, and claiming that this stance is contradictory or absurd.)
+  """
   content =
-    [ [ noun_ "nūbibus" @= "clouds", adjective_ "ātrīs" @= "dark" ]
+    [ [ noun_ "nūbibus" @= "clouds", adjective_ "ātrīs" @= "dark, black" ]
     , [ adjective_ "condita" @= "hidden" @$ "nominative subject", adjective_ "nūllum" @= "no" @$ "accusative object" ]
     , [ verb_ "fundere" @= "to pour", verb_ "possunt" @= "are able" ]
     , [ noun_ "sīdera" @= "stars" @$ "nominative subject", noun_ "lūmen" @= "light" @$ "accusative object" ]
@@ -492,6 +510,8 @@ metron =
     , [ noun_ "rūpe" @= "cliff", adjective_ "solūtī" @= "loose" ]
     , [ noun_ "ōbice" @< "ōbex" @= "obstacle" @$ "ablative of place where", noun_ "saxī" @= "rock", period ]
 
+    , [ space ]
+
     , [ pronoun_ "tū" @= "you", adverb_ "quoque" @= "also", conjunction_ "sī" @= "if", verb_ "vīs" @= "want" ]
     , [ noun_ "lūmine" @= "light", adjective_ "clārō" @= "clear" ]
     , [ verb_ "cernere" @= "discern", noun_ "vērum" @= "the truth" @$ "substantive accusative object" ]
@@ -500,14 +520,14 @@ metron =
     , [ noun_ "gaudia" @= "joys" @$ "accusative object", verb_ "pelle" @= "drive away", comma ]
     , [ verb_ "pelle" @= "drive away", noun_ "timōrem" @= "fear" @$ "accusative object" ]
     , [ noun_ "spem" @= "hope", _que, verb_ "fugātō" @= "put to flight" ]
-    , [ conjunction_ "nec" @= "nor", noun_ "dolor" @= "grief" @$ "nominative subject", verb_ "adsit" @= "be present" ]
+    , [ conjunction_ "nec" @= "nor", noun_ "dolor" @= "grief" @$ "nominative subject", verb_ "adsit" @= "be present", period ]
 
     , [ adjective_ "nūbila" @= "cloudy" @$ "predicate", noun_ "mēns" @= "mind" @$ "nominative subject", verb_ "est" @= "is" ]
     , [ adjective_ "vincta" @= "bound" @$ "predicate", _que, noun_ "frēnīs" @= "bridle" @$ "ablative of instrument" ]
     , [ pronoun_ "hæc" @= "these things" @$ "nominative subject", adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
     ]
   translation = """
-  Through black clouds
+  Through dark clouds
   the hidden stars
   can pour
   no light.
@@ -517,15 +537,16 @@ metron =
   the wave,
   just now glassy
   (as on calm days),
-  soon foul with
+  soon murky with
   loosened mud,
   blocks sight.
-  Whatever river
-  wanders flowing down
-  the tall mountains
+  Whatever river wanders
+  flowing down
+  tall mountains
   often stops
   behind an obstacle,
   a cliff of loose rock.
+      —
   You also, if you want
   to discern the truth
   in a clear light,

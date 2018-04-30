@@ -54,9 +54,12 @@
     }
     #help, #key {
       font-family: "Simonetta";
-      font-size: 18px;
+      font-size: 20px;
     }
-    #help {
+    .introduction {
+      font-size: 24px;
+    }
+    #help, .introduction {
       width: 70%;
     }
     :lang(la) {
@@ -179,6 +182,9 @@
 <body>
   <h1>Translatinator</h1>
   <p id="help">Hover over a word for its definition, info about its role, etc. Click on it to persist that information (click again to cancel). Same dealio for underlined bits of the translation; scroll for the longer annotations.</p>
+  <br/>
+  <p class="introduction">Texts from the second edition of <a href="http://www.press.uchicago.edu/ucp/books/book/chicago/M/bo3622487.html">Medieval Latin</a>; additional background on Boëthius from <a href="https://en.wikipedia.org/wiki/The_Consolation_of_Philosophy">Wikipedia</a> and the <a href="https://plato.stanford.edu/entries/boethius/#ConsPhilArguBookIV2">Stanford Encyclopedia of Philosophy</a>.</p>
+  <br/>
   <div id="app"></div>
   <div id="images">
     <a href="https://en.wikipedia.org/wiki/Magellanic_Clouds"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg/1600px-Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg"/></a>
