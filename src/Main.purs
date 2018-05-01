@@ -46,7 +46,7 @@ type Word =
   }
 type Annote = Tuple String String
 data Punctuation = Comma | Newline | Space | Period | Colon | Semicolon
-  | Enclitic String | Translation String
+  | Question | Enclitic String
 derive instance eqPunctuation :: Eq Punctuation
 derive instance ordPunctuation :: Ord Punctuation
 derive instance genericPunctuation :: Generic Punctuation _
@@ -86,9 +86,6 @@ semicolon = Left Semicolon
 
 _que :: Entity
 _que = Left (Enclitic "que")
-
-lit_ :: String -> Entity
-lit_ = Left <<< Translation
 
 mkword :: WordType -> String -> Word
 mkword word_type = { href: "", def: "", origin: "", alternate: "", role: "", notes: "", word_type, text: _ }
@@ -235,9 +232,9 @@ spacify' = foldl folder { res: [], allow_space: false } where
     Period -> Tuple false true
     Space -> Tuple false false
     Colon -> Tuple false true
+    Question -> Tuple false true
     Semicolon -> Tuple false true
     Enclitic _ -> Tuple false true
-    Translation _ -> Tuple true true
   folder { res, allow_space } (Right w) =
     { allow_space: true
     , res: res <> spaceIf allow_space <> [Right w]
@@ -257,9 +254,9 @@ punctuate = case _ of
   Space -> HH.text " "
   Newline -> HH.br_
   Colon -> HH.text ":"
+  Question -> HH.text "?"
   Semicolon -> HH.text ";"
   Enclitic c -> HH.span [latin, style (CSS.color (colorType Particle))] [ HH.text c ]
-  Translation t -> HH.span [HP.class_ (wrap "translation")] [ HH.text t ]
 
 nonempty :: forall a. String -> (String -> a) -> Array a
 nonempty "" _ = []
@@ -462,7 +459,7 @@ passage =
       ]
     ]
   translation = """
-  Now I know, {Lady Philosophy|[implied] The central figure speaking to Boëthius in this work} says, another – the greatest – cause of your illness;
+  Now I know, {Lady Philosophy|(implied:) The central figure speaking to Boëthius in this work} says, another – the greatest – cause of your illness;
   {you have stopped knowing what you yourself are|reminiscent of “know thyself”, a common refrain in ancient Greece}.
   Wherefore I have found most fully both an {account of your sickness|Lady Philosophy will explain why Boëthius is “sick”} and an {approach for reconciling your safety|And she will provide a solution}.
   For since you are confused by forgetfulness of yourself, you feel pain {that you both are an exile and are despoiled of your own goods|Wikipedia notes that, “Boëthius was at the very heights of power in Rome and was brought down by treachery”; it seems that he instinctively blames others for this, but Lady Philosophy guides him towards another course};
@@ -561,6 +558,142 @@ metron =
   when these things reign.
   """
 
+bernard0 :: Sample
+bernard0 =
+  { author: "Bernard of Cluny"
+  , work: "On Contempt for the World"
+  , section: "1.1–6"
+  , introduction, content, translation
+  } where
+  introduction = """
+  """
+  imminet = verb_ "imminet" @= "hang over, threaten"
+  imminet' = imminet <#> _ { text = "Imminet" }
+  substantive w = adjective_ w @$ "substantive"
+  -- ā ē ī ō ū
+  content =
+    [ [ noun_ "Hora", adjective_ "novissima" @$ "superlative"
+      , noun_ "tempora", adjective_ "pessima" @< "pējor" @$ "superlative"
+      , verb_ "sunt", comma, verb_ "vigilēmus", period
+      ]
+    , [ particle_ "Ecce" @$ "interjection"
+      , adverb_ "mināciter", imminet, noun_ "arbiter" @= "judge, arbitrator; lord, master", comma
+      , pronoun_ "ille", adjective_ "suprēmus"
+      ]
+    , [ imminet', comma, imminet, particle_ "ut"
+      , substantive "mala", verb_ "terminet", comma
+      , substantive "æqua", verb_ "corōnet", comma, newline
+      , substantive "Recta", verb_ "remūneret", comma
+      , substantive "anxia", verb_ "līberet", comma
+      , substantive "æthera", verb_ "dōnet", period
+      ]
+    , [ verb_ "Auferat", comma
+      , adjective_ "aspera", adjective_ "dūra", _que, noun_ "pondera"
+      , noun_ "mentis", adjective_ "onustæ" @= "laden", comma
+      ]
+    , [ substantive "sobria", verb_ "mūniat", comma
+      , substantive "improba", verb_ "pūniat", comma
+      , pronoun_ "ūtraque", adverb_ "justē"
+      ]
+    ]
+  translation = """
+  """
+
+bernard1 :: Sample
+bernard1 =
+  { author: "Bernard of Cluny"
+  , work: "On Contempt for the World"
+  , section: "1.635–644"
+  , introduction, content, translation
+  } where
+  introduction = """
+  Combines imagery of water with fire, depicting torture in hell.
+  """
+  ibi = adverb_ "ibi" @= "there"
+  ibi' = ibi <#> _ { text = "Ibi" }
+  non = adverb_ "nōn" @= "not"
+  non' = non <#> _ { text = "Nōn" }
+  content =
+    [ [ adjective_ "Ignea", noun_ "flūmina", comma
+      , adjective_ "nigra", noun_ "volūmina" @= "eddy"
+      , noun_ "flamma", verb_ "retorquet", comma
+      ]
+    , [ noun_ "Brūma", _que, adjective_ "torrida", comma
+      , noun_ "flamma", _que, adjective_ "frigida"
+      , noun_ "pectora", verb_ "torquet" @= "torture" @.. "a pun on retorquet", period
+      ]
+    , [ noun_ "Vermis", adjective_ "edāx", verb_ "scatet", conjunction_ "et"
+      , noun_ "puteus", verb_ "patet", adjective_ "altus", noun_ "abyssi", period
+      ]
+    , [ verb_ "Sunt", ibi, noun_ "pectore"
+      , verb_ "sunt", ibi, noun_ "corpore"
+      , pronoun_ "quīque", adjective_ "remissī" @$ "participle", period
+      ]
+    , [ verb_ "Lūdite" @$ "imperative", comma, verb_ "vīvite" @$ "imperative", comma
+      , noun_ "fœnore" @= "fænore" @< "fænus", adjective_ "dīvite", comma
+      , noun_ "gēns", adjective_ "aliēna"
+      ]
+    -- ???
+    , [ pronoun_ "Vōs", adjective_ "cārō", verb_ "dēcipit", pronoun_ "hic", comma
+      , ibi, verb_ "suscēpit", pronoun_ "illa", noun_ "gehenna" @= "hell", period
+      ]
+    , [ non', ibi, noun_ "vīsiō", comma
+      , non, ibi, noun_ "mānsiō"
+      , noun_ "lūce", adjective_ "replētā", comma
+      ]
+    , [ adverb_ "Nōn", noun_ "locus", noun_ "ordinis", comma
+      , noun_ "aula", _que, noun_ "lūminis", comma
+      , noun_ "arva", _que, adjective_ "læta", period
+      ]
+    , [ particle_ "Ō", noun_ "Maro", verb_ "falleris", adverb_ "hīc"
+      , adverb_ "ubi", verb_ "cōnseris", noun_ "arva", noun_ "piōrum", comma
+      ]
+    , [ noun_ "Ēlysiōs" @< "Ἠλῠ́σῐον", ibi, non, verb_ "reperis"
+      , pronoun_ "tibi", noun_ "scrīptor", pronoun_ "eōrum", period
+      ]
+    , [ noun_ "Mūsa", adjective_ "poētica", comma
+      , noun_ "lingua", adjective_ "scholastica", comma
+      , noun_ "vōx", adjective_ "theātrālis", comma
+      ]
+    , [ pronoun_ "Hæc", conjunction_ "quia", verb_ "disseris"
+      , conjunction_ "et", adverb_ "malĕ", verb_ "falleris", comma
+      , conjunction_ "et", adverb_ "malĕ", verb_ "fallis", period
+      ]
+    , [ verb_ "Fulgurat", noun_ "ignibus", adverb_ "haud"
+      , noun_ "radiantibus", pronoun_ "illa", noun_ "gehenna" @= "hell", comma
+      ]
+    , [ adjective_ "Plēna", noun_ "nigredine", comma
+      , adjective_ "plēna", _que, noun_ "turbine", comma
+      , adjective_ "plēna", _que, noun_ "pœnā", period
+      ]
+    ]
+    -- ā ē ī ō ū
+  translation = """
+  """
+
+bernard2 :: Sample
+bernard2 =
+  { author: "Bernard of Cluny"
+  , work: "On Contempt for the World"
+  , section: "1.765–74"
+  , introduction, content, translation
+  } where
+  introduction = """
+  """
+  content =
+    [ [ adverb_ "Cūr" @$ "interrogative", noun_ "homō" @.. "apparently metrically short", verb_ "nāscitur", comma
+      , conjunction_ "aut", noun_ "puer", verb_ "ēditur", Left Question
+      , conjunction_ "Ut", verb_ "moriātur", period
+      ]
+    , [ verb_ "Exit", preposition_ "in", noun_ "āera", comma
+      , verb_ "sustinet", noun_ "aspera", comma
+      , verb_ "migrat", verb_ "humātur", period
+      ]
+    ]
+  -- ā ē ī ō ū
+  translation = """
+  """
+
 type State =
   { glossing :: Maybe (Tuple Boolean (Either Word Annote))
   }
@@ -584,14 +717,34 @@ body = H.lifecycleParentComponent
       HH.div [ HP.id_ "parent" ]
         [ HH.p [ HP.id_ "key" ] $ [ HH.text "Color Key: " ] <> legend
         , sidebar (glossing <#> snd)
-        , HH.div [] [ glosser <$> sample passage ]
-        , HH.div [] [ glosser <$> sample metron ]
+        , renderSample passage
+        , renderSample metron
+        , HH.div [ HP.id_ "images" ] $
+          [ Tuple
+              "https://en.wikipedia.org/wiki/Magellanic_Clouds"
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg/1600px-Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg"
+          , Tuple
+              "https://commons.m.wikimedia.org/wiki/File:Caribbean_Sea_-_Long_Exposure.jpg"
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Caribbean_Sea_-_Long_Exposure.jpg/800px-Caribbean_Sea_-_Long_Exposure.jpg"
+          , Tuple
+              "https://en.wikipedia.org/wiki/Northeaster_(painting)"
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Northeaster_by_Winslow_Homer_1895.jpg/800px-Northeaster_by_Winslow_Homer_1895.jpg"
+          , Tuple
+              "https://en.wikipedia.org/wiki/Ilfis_(river)"
+              "https://upload.wikimedia.org/wikipedia/commons/b/bb/Ilfis_en_Langau_en_Emme-Valo_078.jpg"
+          ]
+          <#> \(Tuple href src) ->
+            HH.a [ HP.href href ] [ HH.img [ HP.src src ] ]
+        , renderSample bernard0
+        , renderSample bernard1
+        , renderSample bernard2
         ]
 
     legend = intercalate [ HH.text ", " ] $ map pure $
       [ Verb, Adverb, Conjunction, Preposition, Noun, Pronoun, Adjective, Particle ]
       <#> \v -> HH.span [ style (CSS.color (colorType v)) ] [ HH.text (show v) ]
 
+    renderSample s = HH.div_ [ glosser <$> sample s ]
     glosser = H.action <<< Gloss
 
     p = HH.p_ <<< pure <<< HH.text

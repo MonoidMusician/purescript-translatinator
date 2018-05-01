@@ -51329,6 +51329,13 @@ var Semicolon = (function () {
     Semicolon.value = new Semicolon();
     return Semicolon;
 })();
+var Question = (function () {
+    function Question() {
+
+    };
+    Question.value = new Question();
+    return Question;
+})();
 var Enclitic = (function () {
     function Enclitic(value0) {
         this.value0 = value0;
@@ -51337,15 +51344,6 @@ var Enclitic = (function () {
         return new Enclitic(value0);
     };
     return Enclitic;
-})();
-var Translation = (function () {
-    function Translation(value0) {
-        this.value0 = value0;
-    };
-    Translation.create = function (value0) {
-        return new Translation(value0);
-    };
-    return Translation;
 })();
 var DoNothing = (function () {
     function DoNothing(value0) {
@@ -51369,8 +51367,8 @@ var Gloss = (function () {
     return Gloss;
 })();
 var word = Data_Either.Right.create;
-var split = function ($253) {
-    return Data_String.split("\x0a")(Data_String.trim($253));
+var split = function ($255) {
+    return Data_String.split("\x0a")(Data_String.trim($255));
 };
 var space = new Data_Either.Left(Space.value);
 var spacify$prime = (function () {
@@ -51396,16 +51394,16 @@ var spacify$prime = (function () {
         if (v instanceof Colon) {
             return new Data_Tuple.Tuple(false, true);
         };
+        if (v instanceof Question) {
+            return new Data_Tuple.Tuple(false, true);
+        };
         if (v instanceof Semicolon) {
             return new Data_Tuple.Tuple(false, true);
         };
         if (v instanceof Enclitic) {
             return new Data_Tuple.Tuple(false, true);
         };
-        if (v instanceof Translation) {
-            return new Data_Tuple.Tuple(true, true);
-        };
-        throw new Error("Failed pattern match at Main line 232, column 14 - line 240, column 37: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 229, column 14 - line 237, column 35: " + [ v.constructor.name ]);
     };
     var folder = function (v) {
         return function (v1) {
@@ -51422,7 +51420,7 @@ var spacify$prime = (function () {
                     res: Data_Semigroup.append(Data_Semigroup.semigroupArray)(v.res)(Data_Semigroup.append(Data_Semigroup.semigroupArray)(spaceIf(v.allow_space && v2.value0))([ new Data_Either.Left(v1.value0) ]))
                 };
             };
-            throw new Error("Failed pattern match at Main line 241, column 3 - line 244, column 6: " + [ v.constructor.name, v1.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 238, column 3 - line 241, column 6: " + [ v.constructor.name, v1.constructor.name ]);
         };
     };
     return Data_Foldable.foldl(Data_Foldable.foldableArray)(folder)({
@@ -51430,22 +51428,22 @@ var spacify$prime = (function () {
         allow_space: false
     });
 })();
-var spacify = function ($254) {
+var spacify = function ($256) {
     return (function (v) {
         return v.res;
-    })(spacify$prime($254));
+    })(spacify$prime($256));
 };
 var sive = function (w) {
     return function (alternate) {
         return Data_Functor.mapFlipped(Data_Either.functorEither)(w)(function (v) {
-            var $67 = {};
-            for (var $68 in v) {
-                if ({}.hasOwnProperty.call(v, $68)) {
-                    $67[$68] = v[$68];
+            var $65 = {};
+            for (var $66 in v) {
+                if ({}.hasOwnProperty.call(v, $66)) {
+                    $65[$66] = v[$66];
                 };
             };
-            $67.alternate = alternate;
-            return $67;
+            $65.alternate = alternate;
+            return $65;
         });
     };
 };
@@ -51465,8 +51463,8 @@ var renderTrans = function (v) {
     };
     return Halogen_HTML_Elements.span([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("annotated")), Halogen_HTML_Events.onClick(Control_Applicative.pure(Control_Applicative.applicativeFn)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Data_Tuple.Tuple.create(true)(new Data_Maybe.Just(v))))), Halogen_HTML_Events.onMouseOver(Control_Applicative.pure(Control_Applicative.applicativeFn)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Data_Tuple.Tuple.create(false)(new Data_Maybe.Just(v))))), Halogen_HTML_Events.onMouseOut(Control_Applicative.pure(Control_Applicative.applicativeFn)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(new Data_Tuple.Tuple(false, Data_Maybe.Nothing.value)))) ])([ Halogen_HTML_Core.text(v.value1) ]);
 };
-var renderTransBits = function ($255) {
-    return Data_Functor.map(Data_Functor.functorArray)(renderTrans)(Data_Array.fromFoldable(Data_List_Types.foldableList)($255));
+var renderTransBits = function ($257) {
+    return Data_Functor.map(Data_Functor.functorArray)(renderTrans)(Data_Array.fromFoldable(Data_List_Types.foldableList)($257));
 };
 var period = new Data_Either.Left(Period.value);
 var parseTrans = function (v) {
@@ -51503,14 +51501,14 @@ var parseTrans = function (v) {
 var nota = function (w) {
     return function (notes) {
         return Data_Functor.mapFlipped(Data_Either.functorEither)(w)(function (v) {
-            var $89 = {};
-            for (var $90 in v) {
-                if ({}.hasOwnProperty.call(v, $90)) {
-                    $89[$90] = v[$90];
+            var $87 = {};
+            for (var $88 in v) {
+                if ({}.hasOwnProperty.call(v, $88)) {
+                    $87[$88] = v[$88];
                 };
             };
-            $89.notes = notes;
-            return $89;
+            $87.notes = notes;
+            return $87;
         });
     };
 };
@@ -51538,27 +51536,24 @@ var mkword = function (word_type) {
     };
 };
 var noun = mkword(Noun.value);
-var noun_ = function ($256) {
-    return word(noun($256));
+var noun_ = function ($258) {
+    return word(noun($258));
 };
 var particle = mkword(Particle.value);
-var particle_ = function ($257) {
-    return word(particle($257));
+var particle_ = function ($259) {
+    return word(particle($259));
 };
 var preposition = mkword(Preposition.value);
-var preposition_ = function ($258) {
-    return word(preposition($258));
+var preposition_ = function ($260) {
+    return word(preposition($260));
 };
 var pronoun = mkword(Pronoun.value);
-var pronoun_ = function ($259) {
-    return word(pronoun($259));
+var pronoun_ = function ($261) {
+    return word(pronoun($261));
 };
 var verb = mkword(Verb.value);
-var verb_ = function ($260) {
-    return word(verb($260));
-};
-var lit_ = function ($261) {
-    return Data_Either.Left.create(Translation.create($261));
+var verb_ = function ($262) {
+    return word(verb($262));
 };
 var latin = Halogen_HTML_Properties.prop(Halogen_HTML_Core.stringIsProp)("lang")("la");
 var genericWordType = new Data_Generic_Rep.Generic(function (x) {
@@ -51650,10 +51645,10 @@ var genericPunctuation = new Data_Generic_Rep.Generic(function (x) {
     if (x instanceof Semicolon) {
         return new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inl(Data_Generic_Rep.NoArguments.value))))));
     };
-    if (x instanceof Enclitic) {
-        return new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inl(x.value0)))))));
+    if (x instanceof Question) {
+        return new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inl(Data_Generic_Rep.NoArguments.value)))))));
     };
-    if (x instanceof Translation) {
+    if (x instanceof Enclitic) {
         return new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(new Data_Generic_Rep.Inr(x.value0)))))));
     };
     throw new Error("Failed pattern match at Main line 52, column 8 - line 52, column 60: " + [ x.constructor.name ]);
@@ -51677,10 +51672,10 @@ var genericPunctuation = new Data_Generic_Rep.Generic(function (x) {
         return Semicolon.value;
     };
     if (x instanceof Data_Generic_Rep.Inr && (x.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0.value0.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0.value0.value0.value0 instanceof Data_Generic_Rep.Inr && x.value0.value0.value0.value0.value0.value0 instanceof Data_Generic_Rep.Inl)))))) {
-        return new Enclitic(x.value0.value0.value0.value0.value0.value0.value0);
+        return Question.value;
     };
     if (x instanceof Data_Generic_Rep.Inr && (x.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0.value0.value0 instanceof Data_Generic_Rep.Inr && (x.value0.value0.value0.value0.value0 instanceof Data_Generic_Rep.Inr && x.value0.value0.value0.value0.value0.value0 instanceof Data_Generic_Rep.Inr)))))) {
-        return new Translation(x.value0.value0.value0.value0.value0.value0.value0);
+        return new Enclitic(x.value0.value0.value0.value0.value0.value0.value0);
     };
     throw new Error("Failed pattern match at Main line 52, column 8 - line 52, column 60: " + [ x.constructor.name ]);
 });
@@ -51696,22 +51691,22 @@ var showPunctuation = new Data_Show.Show(Data_Generic_Rep_Show.genericShow(gener
     return "Colon";
 })))(Data_Generic_Rep_Show.genericShowSum(Data_Generic_Rep_Show.genericShowConstructor(Data_Generic_Rep_Show.genericShowArgsNoArguments)(new Data_Symbol.IsSymbol(function () {
     return "Semicolon";
-})))(Data_Generic_Rep_Show.genericShowSum(Data_Generic_Rep_Show.genericShowConstructor(Data_Generic_Rep_Show.genericShowArgsArgument(Data_Show.showString))(new Data_Symbol.IsSymbol(function () {
-    return "Enclitic";
+})))(Data_Generic_Rep_Show.genericShowSum(Data_Generic_Rep_Show.genericShowConstructor(Data_Generic_Rep_Show.genericShowArgsNoArguments)(new Data_Symbol.IsSymbol(function () {
+    return "Question";
 })))(Data_Generic_Rep_Show.genericShowConstructor(Data_Generic_Rep_Show.genericShowArgsArgument(Data_Show.showString))(new Data_Symbol.IsSymbol(function () {
-    return "Translation";
+    return "Enclitic";
 })))))))))));
 var from = function (w) {
     return function (origin) {
         return Data_Functor.mapFlipped(Data_Either.functorEither)(w)(function (v) {
-            var $170 = {};
-            for (var $171 in v) {
-                if ({}.hasOwnProperty.call(v, $171)) {
-                    $170[$171] = v[$171];
+            var $167 = {};
+            for (var $168 in v) {
+                if ({}.hasOwnProperty.call(v, $168)) {
+                    $167[$168] = v[$168];
                 };
             };
-            $170.origin = origin;
-            return $170;
+            $167.origin = origin;
+            return $167;
         });
     };
 };
@@ -51837,10 +51832,10 @@ var eqPunctuation = new Data_Eq.Eq(function (x) {
         if (x instanceof Semicolon && y instanceof Semicolon) {
             return true;
         };
-        if (x instanceof Enclitic && y instanceof Enclitic) {
-            return x.value0 === y.value0;
+        if (x instanceof Question && y instanceof Question) {
+            return true;
         };
-        if (x instanceof Translation && y instanceof Translation) {
+        if (x instanceof Enclitic && y instanceof Enclitic) {
             return x.value0 === y.value0;
         };
         return false;
@@ -51904,24 +51899,24 @@ var ordPunctuation = new Data_Ord.Ord(function () {
         if (y instanceof Semicolon) {
             return Data_Ordering.GT.value;
         };
-        if (x instanceof Enclitic && y instanceof Enclitic) {
-            return Data_Ord.compare(Data_Ord.ordString)(x.value0)(y.value0);
+        if (x instanceof Question && y instanceof Question) {
+            return Data_Ordering.EQ.value;
         };
-        if (x instanceof Enclitic) {
+        if (x instanceof Question) {
             return Data_Ordering.LT.value;
         };
-        if (y instanceof Enclitic) {
+        if (y instanceof Question) {
             return Data_Ordering.GT.value;
         };
-        if (x instanceof Translation && y instanceof Translation) {
+        if (x instanceof Enclitic && y instanceof Enclitic) {
             return Data_Ord.compare(Data_Ord.ordString)(x.value0)(y.value0);
         };
         throw new Error("Failed pattern match at Main line 51, column 8 - line 51, column 50: " + [ x.constructor.name, y.constructor.name ]);
     };
 });
 var conjunction = mkword(Conjunction.value);
-var conjunction_ = function ($262) {
-    return word(conjunction($262));
+var conjunction_ = function ($263) {
+    return word(conjunction($263));
 };
 var comma = new Data_Either.Left(Comma.value);
 
@@ -51991,13 +51986,13 @@ var colorType = function (v) {
     if (v instanceof Preposition) {
         return Color.rgb(142)(44)(171);
     };
-    throw new Error("Failed pattern match at Main line 205, column 13 - line 215, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Main line 202, column 13 - line 212, column 1: " + [ v.constructor.name ]);
 };
 var colorize$prime = function (props) {
     return function (v) {
         var klass = Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)(v.role + (function () {
-            var $194 = v.notes !== "";
-            if ($194) {
+            var $185 = v.notes !== "";
+            if ($185) {
                 return " notated";
             };
             return "";
@@ -52023,36 +52018,36 @@ var punctuate = function (v) {
     if (v instanceof Colon) {
         return Halogen_HTML_Core.text(":");
     };
+    if (v instanceof Question) {
+        return Halogen_HTML_Core.text("?");
+    };
     if (v instanceof Semicolon) {
         return Halogen_HTML_Core.text(";");
     };
     if (v instanceof Enclitic) {
         return Halogen_HTML_Elements.span([ latin, Halogen_HTML_CSS.style(CSS_Font.color(colorType(Particle.value))) ])([ Halogen_HTML_Core.text(v.value0) ]);
     };
-    if (v instanceof Translation) {
-        return Halogen_HTML_Elements.span([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("translation")) ])([ Halogen_HTML_Core.text(v.value0) ]);
-    };
-    throw new Error("Failed pattern match at Main line 254, column 13 - line 262, column 74: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Main line 251, column 13 - line 259, column 86: " + [ v.constructor.name ]);
 };
 var sample = function (v) {
-    var translated = Data_Functor.map(Data_Functor.functorArray)(function ($263) {
-        return renderTransBits(parseTrans($263));
+    var translated = Data_Functor.map(Data_Functor.functorArray)(function ($264) {
+        return renderTransBits(parseTrans($264));
     })(split(v.translation));
     var sec = nonempty(v.section)(Control_Applicative.pure(Control_Applicative.applicativeFn)(Halogen_HTML_Elements.h3([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("section")) ])([ Halogen_HTML_Core.text("(" + (v.section + ")")) ])));
     var atRow = function (row) {
         return Halogen_HTML_CSS.style(CSS_Stylesheet.key(CSS_Property.valString)(CSS_String.fromString(CSS_Property.isStringKey)("grid-row"))(Data_Show.show(Data_Show.showInt)(row + 1 | 0)));
     };
-    return Halogen_HTML_Elements.section_([ Halogen_HTML_Elements.h2_(Control_Bind.join(Control_Bind.bindArray)([ [ Halogen_HTML_Core.text(v.author + (": " + v.work)) ], sec ])), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("introduction")) ])(Data_Functor.mapFlipped(Data_Functor.functorArray)(split(v.introduction))(function ($264) {
-        return Halogen_HTML_Elements.p_((function ($265) {
+    return Halogen_HTML_Elements.section_([ Halogen_HTML_Elements.h2_(Control_Bind.join(Control_Bind.bindArray)([ [ Halogen_HTML_Core.text(v.author + (": " + v.work)) ], sec ])), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("introduction")) ])(Data_Functor.mapFlipped(Data_Functor.functorArray)(split(v.introduction))(function ($265) {
+        return Halogen_HTML_Elements.p_((function ($266) {
             return Data_Functor.map(Data_Functor.functorArray)(function (v1) {
                 if (v1.value0 === "") {
                     return Halogen_HTML_Core.text(v1.value1);
                 };
                 return Halogen_HTML_Elements.a([ Halogen_HTML_Properties.href(v1.value0) ])([ Halogen_HTML_Core.text(v1.value1) ]);
-            })(Data_Array.fromFoldable(Data_List_Types.foldableList)($265));
-        })(parseTrans($264)));
+            })(Data_Array.fromFoldable(Data_List_Types.foldableList)($266));
+        })(parseTrans($265)));
     })), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("translation-parent")) ])(Control_Bind.join(Control_Bind.bindArray)([ Data_Array.mapWithIndex(function (row) {
-        return function ($266) {
+        return function ($267) {
             return Halogen_HTML_Elements.p([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("line")), atRow(row) ])(Data_Functor.map(Data_Functor.functorArray)(function (v1) {
                 if (v1 instanceof Data_Either.Left) {
                     return punctuate(v1.value0);
@@ -52060,12 +52055,12 @@ var sample = function (v) {
                 if (v1 instanceof Data_Either.Right) {
                     return colorize$prime([ Halogen_HTML_Properties.title(v1.value0.role), Halogen_HTML_Events.onClick(Control_Applicative.pure(Control_Applicative.applicativeFn)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Data_Tuple.Tuple.create(true)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(new Data_Either.Left(v1.value0)))))), Halogen_HTML_Events.onMouseOver(Control_Applicative.pure(Control_Applicative.applicativeFn)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Data_Tuple.Tuple.create(false)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(new Data_Either.Left(v1.value0)))))), Halogen_HTML_Events.onMouseOut(Control_Applicative.pure(Control_Applicative.applicativeFn)(Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Data_Tuple.Tuple.create(false)(Data_Maybe.Nothing.value)))) ])(v1.value0);
                 };
-                throw new Error("Failed pattern match at Main line 327, column 59 - line 334, column 14: " + [ v1.constructor.name ]);
-            })($266));
+                throw new Error("Failed pattern match at Main line 324, column 59 - line 331, column 14: " + [ v1.constructor.name ]);
+            })($267));
         };
     })(Data_Functor.map(Data_Functor.functorArray)(spacify)(v.content)), Data_Array.mapWithIndex(function (row) {
-        return function ($267) {
-            return Halogen_HTML_Elements.p([ atRow(row) ])(Data_Functor.map(Data_Functor.functorArray)(Data_Functor.map(Halogen_HTML_Core.functorHTML)(Data_Functor.map(Data_Tuple.functorTuple)(Data_Functor.map(Data_Maybe.functorMaybe)(Data_Either.Right.create))))($267));
+        return function ($268) {
+            return Halogen_HTML_Elements.p([ atRow(row) ])(Data_Functor.map(Data_Functor.functorArray)(Data_Functor.map(Halogen_HTML_Core.functorHTML)(Data_Functor.map(Data_Tuple.functorTuple)(Data_Functor.map(Data_Maybe.functorMaybe)(Data_Either.Right.create))))($268));
         };
     })(translated) ])) ]);
 };
@@ -52073,40 +52068,117 @@ var colon = new Data_Either.Left(Colon.value);
 var as = function (w) {
     return function (role) {
         return Data_Functor.mapFlipped(Data_Either.functorEither)(w)(function (v) {
-            var $217 = {};
-            for (var $218 in v) {
-                if ({}.hasOwnProperty.call(v, $218)) {
-                    $217[$218] = v[$218];
+            var $207 = {};
+            for (var $208 in v) {
+                if ({}.hasOwnProperty.call(v, $208)) {
+                    $207[$208] = v[$208];
                 };
             };
-            $217.role = role;
-            return $217;
+            $207.role = role;
+            return $207;
         });
     };
 };
 var adverb = mkword(Adverb.value);
-var adverb_ = function ($268) {
-    return word(adverb($268));
+var adverb_ = function ($269) {
+    return word(adverb($269));
 };
+var bernard2 = (function () {
+    
+    // ā ē ī ō ū
+var translation = "\x0a  ";
+    var content = [ [ as(adverb_("Cu\u0304r"))("interrogative"), nota(noun_("homo\u0304"))("apparently metrically short"), verb_("na\u0304scitur"), comma, conjunction_("aut"), noun_("puer"), verb_("e\u0304ditur"), new Data_Either.Left(Question.value), conjunction_("Ut"), verb_("moria\u0304tur"), period ], [ verb_("Exit"), preposition_("in"), noun_("a\u0304era"), comma, verb_("sustinet"), noun_("aspera"), comma, verb_("migrat"), verb_("huma\u0304tur"), period ] ];
+    return {
+        author: "Bernard of Cluny",
+        work: "On Contempt for the World",
+        section: "1.765\u201374",
+        introduction: "\x0a  ",
+        content: content,
+        translation: translation
+    };
+})();
 var adjective = mkword(Adjective.value);
-var adjective_ = function ($269) {
-    return word(adjective($269));
+var adjective_ = function ($270) {
+    return word(adjective($270));
 };
 var addef = function (w) {
     return function (def) {
         return Data_Functor.mapFlipped(Data_Either.functorEither)(w)(function (v) {
-            var $220 = {};
-            for (var $221 in v) {
-                if ({}.hasOwnProperty.call(v, $221)) {
-                    $220[$221] = v[$221];
+            var $210 = {};
+            for (var $211 in v) {
+                if ({}.hasOwnProperty.call(v, $211)) {
+                    $210[$211] = v[$211];
                 };
             };
-            $220.def = def;
-            return $220;
+            $210.def = def;
+            return $210;
         });
     };
 };
 var _que = new Data_Either.Left(new Enclitic("que"));
+var bernard0 = (function () {
+    var substantive = function (w) {
+        return as(adjective_(w))("substantive");
+    };
+    var imminet = addef(verb_("imminet"))("hang over, threaten");
+    var imminet$prime = Data_Functor.mapFlipped(Data_Either.functorEither)(imminet)(function (v) {
+        var $213 = {};
+        for (var $214 in v) {
+            if ({}.hasOwnProperty.call(v, $214)) {
+                $213[$214] = v[$214];
+            };
+        };
+        $213.text = "Imminet";
+        return $213;
+    });
+    
+    // ā ē ī ō ū
+var content = [ [ noun_("Hora"), as(adjective_("novissima"))("superlative"), noun_("tempora"), as(from(adjective_("pessima"))("pe\u0304jor"))("superlative"), verb_("sunt"), comma, verb_("vigile\u0304mus"), period ], [ as(particle_("Ecce"))("interjection"), adverb_("mina\u0304citer"), imminet, addef(noun_("arbiter"))("judge, arbitrator; lord, master"), comma, pronoun_("ille"), adjective_("supre\u0304mus") ], [ imminet$prime, comma, imminet, particle_("ut"), substantive("mala"), verb_("terminet"), comma, substantive("\xe6qua"), verb_("coro\u0304net"), comma, newline, substantive("Recta"), verb_("remu\u0304neret"), comma, substantive("anxia"), verb_("li\u0304beret"), comma, substantive("\xe6thera"), verb_("do\u0304net"), period ], [ verb_("Auferat"), comma, adjective_("aspera"), adjective_("du\u0304ra"), _que, noun_("pondera"), noun_("mentis"), addef(adjective_("onust\xe6"))("laden"), comma ], [ substantive("sobria"), verb_("mu\u0304niat"), comma, substantive("improba"), verb_("pu\u0304niat"), comma, pronoun_("u\u0304traque"), adverb_("juste\u0304") ] ];
+    return {
+        author: "Bernard of Cluny",
+        work: "On Contempt for the World",
+        section: "1.1\u20136",
+        introduction: "\x0a  ",
+        content: content,
+        translation: "\x0a  "
+    };
+})();
+var bernard1 = (function () {
+    
+    // ā ē ī ō ū
+var translation = "\x0a  ";
+    var non = addef(adverb_("no\u0304n"))("not");
+    var non$prime = Data_Functor.mapFlipped(Data_Either.functorEither)(non)(function (v) {
+        var $216 = {};
+        for (var $217 in v) {
+            if ({}.hasOwnProperty.call(v, $217)) {
+                $216[$217] = v[$217];
+            };
+        };
+        $216.text = "No\u0304n";
+        return $216;
+    });
+    var ibi = addef(adverb_("ibi"))("there");
+    var ibi$prime = Data_Functor.mapFlipped(Data_Either.functorEither)(ibi)(function (v) {
+        var $219 = {};
+        for (var $220 in v) {
+            if ({}.hasOwnProperty.call(v, $220)) {
+                $219[$220] = v[$220];
+            };
+        };
+        $219.text = "Ibi";
+        return $219;
+    });
+    var content = [ [ adjective_("Ignea"), noun_("flu\u0304mina"), comma, adjective_("nigra"), addef(noun_("volu\u0304mina"))("eddy"), noun_("flamma"), verb_("retorquet"), comma ], [ noun_("Bru\u0304ma"), _que, adjective_("torrida"), comma, noun_("flamma"), _que, adjective_("frigida"), noun_("pectora"), nota(addef(verb_("torquet"))("torture"))("a pun on retorquet"), period ], [ noun_("Vermis"), adjective_("eda\u0304x"), verb_("scatet"), conjunction_("et"), noun_("puteus"), verb_("patet"), adjective_("altus"), noun_("abyssi"), period ], [ verb_("Sunt"), ibi, noun_("pectore"), verb_("sunt"), ibi, noun_("corpore"), pronoun_("qui\u0304que"), as(adjective_("remissi\u0304"))("participle"), period ], [ as(verb_("Lu\u0304dite"))("imperative"), comma, as(verb_("vi\u0304vite"))("imperative"), comma, from(addef(noun_("f\u0153nore"))("f\xe6nore"))("f\xe6nus"), adjective_("di\u0304vite"), comma, noun_("ge\u0304ns"), adjective_("alie\u0304na") ], [ pronoun_("Vo\u0304s"), adjective_("ca\u0304ro\u0304"), verb_("de\u0304cipit"), pronoun_("hic"), comma, ibi, verb_("susce\u0304pit"), pronoun_("illa"), addef(noun_("gehenna"))("hell"), period ], [ non$prime, ibi, noun_("vi\u0304sio\u0304"), comma, non, ibi, noun_("ma\u0304nsio\u0304"), noun_("lu\u0304ce"), adjective_("reple\u0304ta\u0304"), comma ], [ adverb_("No\u0304n"), noun_("locus"), noun_("ordinis"), comma, noun_("aula"), _que, noun_("lu\u0304minis"), comma, noun_("arva"), _que, adjective_("l\xe6ta"), period ], [ particle_("\u014c"), noun_("Maro"), verb_("falleris"), adverb_("hi\u0304c"), adverb_("ubi"), verb_("co\u0304nseris"), noun_("arva"), noun_("pio\u0304rum"), comma ], [ from(noun_("\u0112lysio\u0304s"))("\u1f28\u03bb\u1fe0\u0301\u03c3\u1fd0\u03bf\u03bd"), ibi, non, verb_("reperis"), pronoun_("tibi"), noun_("scri\u0304ptor"), pronoun_("eo\u0304rum"), period ], [ noun_("Mu\u0304sa"), adjective_("poe\u0304tica"), comma, noun_("lingua"), adjective_("scholastica"), comma, noun_("vo\u0304x"), adjective_("thea\u0304tra\u0304lis"), comma ], [ pronoun_("H\xe6c"), conjunction_("quia"), verb_("disseris"), conjunction_("et"), adverb_("mal\u0115"), verb_("falleris"), comma, conjunction_("et"), adverb_("mal\u0115"), verb_("fallis"), period ], [ verb_("Fulgurat"), noun_("ignibus"), adverb_("haud"), noun_("radiantibus"), pronoun_("illa"), addef(noun_("gehenna"))("hell"), comma ], [ adjective_("Ple\u0304na"), noun_("nigredine"), comma, adjective_("ple\u0304na"), _que, noun_("turbine"), comma, adjective_("ple\u0304na"), _que, noun_("p\u0153na\u0304"), period ] ];
+    return {
+        author: "Bernard of Cluny",
+        work: "On Contempt for the World",
+        section: "1.635\u2013644",
+        introduction: "\x0a  Combines imagery of water with fire, depicting torture in hell.\x0a  ",
+        content: content,
+        translation: translation
+    };
+})();
 var metron = (function () {
     var content = [ [ addef(noun_("nu\u0304bibus"))("clouds"), addef(adjective_("a\u0304tri\u0304s"))("dark, black") ], [ as(addef(adjective_("condita"))("hidden"))("nominative subject"), as(addef(adjective_("nu\u0304llum"))("no"))("accusative object") ], [ addef(verb_("fundere"))("to pour"), addef(verb_("possunt"))("are able") ], [ as(addef(noun_("si\u0304dera"))("stars"))("nominative subject"), as(addef(noun_("lu\u0304men"))("light"))("accusative object") ], [ addef(conjunction_("si\u0304"))("if"), as(addef(noun_("mare"))("sea"))("accusative object"), as(addef(verb_("volve\u0304ns"))("rolling"))("active") ], [ addef(adjective_("turbidus"))("turbulent"), addef(noun_("Auster"))("the South Wind") ], [ addef(verb_("misceat"))("stir up"), as(addef(noun_("\xe6stum"))("surge"))("accusative object"), comma ], [ addef(adjective_("vitrea"))("glassy"), addef(adverb_("du\u0304dum"))("just now") ], [ addef(adverb_("par"))("equally"), _que, addef(adjective_("sere\u0304ni\u0304s"))("tranquil") ], [ as(addef(noun_("unda"))("wave"))("nominative subject"), addef(noun_("die\u0304bus"))("days") ], [ addef(adverb_("mox"))("soon"), addef(adjective_("resolu\u0304to\u0304"))("loosened") ], [ addef(adjective_("sordida"))("foul"), as(addef(noun_("c\xe6no\u0304"))("mud"))("ablative of means") ], [ addef(noun_("vi\u0304sibus"))("sight(s)"), addef(verb_("obstat"))("blocks"), comma ], [ as(addef(pronoun_("qui\u0304que"))("whatever"))("nominative subject"), addef(verb_("vaga\u0304tur"))("wanders") ], [ addef(noun_("montibus"))("mountains"), addef(adjective_("alti\u0304s"))("tall") ], [ as(addef(adjective_("de\u0304fluus"))("flowing down"))("ablative of place from which"), as(addef(noun_("amnis"))("river"))("nominative subject") ], [ addef(adverb_("s\xe6pe"))("often"), addef(verb_("restitit"))("stops behind, remains") ], [ addef(noun_("ru\u0304pe"))("cliff"), addef(adjective_("solu\u0304ti\u0304"))("loose") ], [ as(addef(from(noun_("o\u0304bice"))("o\u0304bex"))("obstacle"))("ablative of place where"), addef(noun_("saxi\u0304"))("rock"), period ], [ space ], [ addef(pronoun_("tu\u0304"))("you"), addef(adverb_("quoque"))("also"), addef(conjunction_("si\u0304"))("if"), addef(verb_("vi\u0304s"))("want") ], [ addef(noun_("lu\u0304mine"))("light"), addef(adjective_("cla\u0304ro\u0304"))("clear") ], [ addef(verb_("cernere"))("discern"), as(addef(noun_("ve\u0304rum"))("the truth"))("substantive accusative object") ], [ addef(noun_("tra\u0304mite"))("riverbed"), addef(adjective_("re\u0304cto\u0304"))("straight") ], [ addef(verb_("carpere"))("seize"), as(addef(noun_("callem"))("path"))("accusative object"), colon ], [ as(addef(noun_("gaudia"))("joys"))("accusative object"), addef(verb_("pelle"))("drive away"), comma ], [ addef(verb_("pelle"))("drive away"), as(addef(noun_("timo\u0304rem"))("fear"))("accusative object") ], [ addef(noun_("spem"))("hope"), _que, addef(verb_("fuga\u0304to\u0304"))("put to flight") ], [ addef(conjunction_("nec"))("nor"), as(addef(noun_("dolor"))("grief"))("nominative subject"), addef(verb_("adsit"))("be present"), period ], [ as(addef(adjective_("nu\u0304bila"))("cloudy"))("predicate"), as(addef(noun_("me\u0304ns"))("mind"))("nominative subject"), addef(verb_("est"))("is") ], [ as(addef(adjective_("vincta"))("bound"))("predicate"), _que, as(addef(noun_("fre\u0304ni\u0304s"))("bridle"))("ablative of instrument") ], [ as(addef(pronoun_("h\xe6c"))("these things"))("nominative subject"), addef(adverb_("ubi"))("when"), addef(verb_("regnant"))("reign"), period ] ];
     return {
@@ -52126,15 +52198,15 @@ var passage = (function () {
         section: "1 pr. 6.17\u201321",
         introduction: "\x0a  These are two related excerpts from a work of Anicius Manlius Severinus Bo\xebthius. The central figure in the work is Lady Philosophy, a personification of philosophical arguments which Bo\xebthius addresses to his own character.\x0a  This was written while Bo\xebthius was awaiting execution; formerly part of the government of the {Ostrogothic King Theodoric the Great|https://en.wikipedia.org/wiki/Theoderic_the_Great}, he was implicated (falsely, he claims!) in treasonous acts, and sentenced to death. This work is his way of dealing with death, wrestling with ideas of (mis)fortune, chance, and justice as well; addressing these however through philosophy, not religion.\x0a  This prose passage is part of Lady Philosophy\u2019s logical argument towards him.\x0a  ",
         content: content,
-        translation: "\x0a  Now I know, {Lady Philosophy|[implied] The central figure speaking to Bo\xebthius in this work} says, another \u2013 the greatest \u2013 cause of your illness;\x0a  {you have stopped knowing what you yourself are|reminiscent of \u201cknow thyself\u201d, a common refrain in ancient Greece}.\x0a  Wherefore I have found most fully both an {account of your sickness|Lady Philosophy will explain why Bo\xebthius is \u201csick\u201d} and an {approach for reconciling your safety|And she will provide a solution}.\x0a  For since you are confused by forgetfulness of yourself, you feel pain {that you both are an exile and are despoiled of your own goods|Wikipedia notes that, \u201cBo\xebthius was at the very heights of power in Rome and was brought down by treachery\u201d; it seems that he instinctively blames others for this, but Lady Philosophy guides him towards another course};\x0a      since you truly are ignorant of who the end of things is, you judge that men are worthless, and the powerful and lucky are execrable;\x0a      since you truly have forgotten by what governments the world is ruled, you reckon these changes of fortunes flow without a guide:\x0a  these are the great causes not only of your illness but also of your ruin.\x0a  But give thanks to {author of your safety|i.e. Lady Philosophy}, because nature has not yet wholly forsaken you.\x0a  We have {the greatest tindling for your health|Now comes her solution} \u2013 a true opinion of the governance of the world \u2013 because you believe that {it|i.e. the governance of the world} is not subjected by the chance of disasters but by the thought of divinity;\x0a  therefore, may you not fear anything greatly, {already|i.e. as soon as he stops being afraid} to you the glow of life will have shined from this smallest sparklet.\x0a  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the truth being contemplated,\x0a  I will try to lessen this for a little bit with soft and more moderate nourishments, so that you may recognize the splendor of true light, with the gloom of fallacious affections shed off.\x0a  "
+        translation: "\x0a  Now I know, {Lady Philosophy|(implied:) The central figure speaking to Bo\xebthius in this work} says, another \u2013 the greatest \u2013 cause of your illness;\x0a  {you have stopped knowing what you yourself are|reminiscent of \u201cknow thyself\u201d, a common refrain in ancient Greece}.\x0a  Wherefore I have found most fully both an {account of your sickness|Lady Philosophy will explain why Bo\xebthius is \u201csick\u201d} and an {approach for reconciling your safety|And she will provide a solution}.\x0a  For since you are confused by forgetfulness of yourself, you feel pain {that you both are an exile and are despoiled of your own goods|Wikipedia notes that, \u201cBo\xebthius was at the very heights of power in Rome and was brought down by treachery\u201d; it seems that he instinctively blames others for this, but Lady Philosophy guides him towards another course};\x0a      since you truly are ignorant of who the end of things is, you judge that men are worthless, and the powerful and lucky are execrable;\x0a      since you truly have forgotten by what governments the world is ruled, you reckon these changes of fortunes flow without a guide:\x0a  these are the great causes not only of your illness but also of your ruin.\x0a  But give thanks to {author of your safety|i.e. Lady Philosophy}, because nature has not yet wholly forsaken you.\x0a  We have {the greatest tindling for your health|Now comes her solution} \u2013 a true opinion of the governance of the world \u2013 because you believe that {it|i.e. the governance of the world} is not subjected by the chance of disasters but by the thought of divinity;\x0a  therefore, may you not fear anything greatly, {already|i.e. as soon as he stops being afraid} to you the glow of life will have shined from this smallest sparklet.\x0a  But since it is not yet time for the stronger remedies, and it is agreed that the nature of minds is that as often as they throw away true opinions, they take on false ones, arisen from which the fog of confusions confuses the truth being contemplated,\x0a  I will try to lessen this for a little bit with soft and more moderate nourishments, so that you may recognize the splendor of true light, with the gloom of fallacious affections shed off.\x0a  "
     };
 })();
 var body = function (dictMonadAff) {
-    var spla = function ($270) {
-        return Halogen_HTML_Elements.span([ latin ])(Control_Applicative.pure(Control_Applicative.applicativeArray)(Halogen_HTML_Core.text($270)));
+    var spla = function ($271) {
+        return Halogen_HTML_Elements.span([ latin ])(Control_Applicative.pure(Control_Applicative.applicativeArray)(Halogen_HTML_Core.text($271)));
     };
-    var p = function ($271) {
-        return Halogen_HTML_Elements.p_(Control_Applicative.pure(Control_Applicative.applicativeArray)(Halogen_HTML_Core.text($271)));
+    var p = function ($272) {
+        return Halogen_HTML_Elements.p_(Control_Applicative.pure(Control_Applicative.applicativeArray)(Halogen_HTML_Core.text($272)));
     };
     var sidebar = function (glossing) {
         return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.id_("sidebar") ])((function () {
@@ -52148,25 +52220,30 @@ var body = function (dictMonadAff) {
                 return [ Halogen_HTML_Elements.h4_([ Halogen_HTML_Core.text(glossing.value0.value0.value1) ]), Halogen_HTML_Elements.span([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("annotation")) ])([ Halogen_HTML_Core.text(glossing.value0.value0.value0) ]) ];
             };
             if (glossing instanceof Data_Maybe.Just && glossing.value0 instanceof Data_Either.Left) {
-                return Control_Bind.join(Control_Bind.bindArray)([ Control_Applicative.pure(Control_Applicative.applicativeArray)(Halogen_HTML_Elements.h3_([ colorize(glossing.value0.value0) ])), nonempty(glossing.value0.value0.alternate)(function ($272) {
-                    return spla(" = " + $272);
-                }), nonempty(glossing.value0.value0.origin)(function ($273) {
-                    return spla(" < " + $273);
+                return Control_Bind.join(Control_Bind.bindArray)([ Control_Applicative.pure(Control_Applicative.applicativeArray)(Halogen_HTML_Elements.h3_([ colorize(glossing.value0.value0) ])), nonempty(glossing.value0.value0.alternate)(function ($273) {
+                    return spla(" = " + $273);
+                }), nonempty(glossing.value0.value0.origin)(function ($274) {
+                    return spla(" < " + $274);
                 }), nonempty(glossing.value0.value0.def)(function (v) {
                     return Halogen_HTML_Elements.p([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("translation")) ])([ Halogen_HTML_Core.text("\u201c" + (v + "\u201d")) ]);
                 }), nonempty(glossing.value0.value0.notes)(p), nonempty(glossing.value0.value0.role)(p) ]);
             };
-            throw new Error("Failed pattern match at Main line 602, column 7 - line 618, column 12: " + [ glossing.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 755, column 7 - line 771, column 12: " + [ glossing.constructor.name ]);
         })());
     };
     var legend = Data_Foldable.intercalate(Data_Foldable.foldableArray)(Data_Monoid.monoidArray)([ Halogen_HTML_Core.text(", ") ])(Data_Functor.map(Data_Functor.functorArray)(Control_Applicative.pure(Control_Applicative.applicativeArray))(Data_Functor.mapFlipped(Data_Functor.functorArray)([ Verb.value, Adverb.value, Conjunction.value, Preposition.value, Noun.value, Pronoun.value, Adjective.value, Particle.value ])(function (v) {
         return Halogen_HTML_Elements.span([ Halogen_HTML_CSS.style(CSS_Font.color(colorType(v))) ])([ Halogen_HTML_Core.text(Data_Show.show(showWordType)(v)) ]);
     })));
-    var glosser = function ($274) {
-        return Halogen_Query.action(Gloss.create($274));
+    var glosser = function ($275) {
+        return Halogen_Query.action(Gloss.create($275));
+    };
+    var renderSample = function (s) {
+        return Halogen_HTML_Elements.div_([ Data_Functor.map(Halogen_HTML_Core.functorHTML)(glosser)(sample(s)) ]);
     };
     var render = function (v) {
-        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.id_("parent") ])([ Halogen_HTML_Elements.p([ Halogen_HTML_Properties.id_("key") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Core.text("Color Key: ") ])(legend)), sidebar(Data_Functor.mapFlipped(Data_Maybe.functorMaybe)(v.glossing)(Data_Tuple.snd)), Halogen_HTML_Elements.div([  ])([ Data_Functor.map(Halogen_HTML_Core.functorHTML)(glosser)(sample(passage)) ]), Halogen_HTML_Elements.div([  ])([ Data_Functor.map(Halogen_HTML_Core.functorHTML)(glosser)(sample(metron)) ]) ]);
+        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.id_("parent") ])([ Halogen_HTML_Elements.p([ Halogen_HTML_Properties.id_("key") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Core.text("Color Key: ") ])(legend)), sidebar(Data_Functor.mapFlipped(Data_Maybe.functorMaybe)(v.glossing)(Data_Tuple.snd)), renderSample(passage), renderSample(metron), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.id_("images") ])(Data_Functor.mapFlipped(Data_Functor.functorArray)([ new Data_Tuple.Tuple("https://en.wikipedia.org/wiki/Magellanic_Clouds", "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg/1600px-Magellanic_Clouds_%E2%80%95_Irregular_Dwarf_Galaxies.jpg"), new Data_Tuple.Tuple("https://commons.m.wikimedia.org/wiki/File:Caribbean_Sea_-_Long_Exposure.jpg", "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Caribbean_Sea_-_Long_Exposure.jpg/800px-Caribbean_Sea_-_Long_Exposure.jpg"), new Data_Tuple.Tuple("https://en.wikipedia.org/wiki/Northeaster_(painting)", "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Northeaster_by_Winslow_Homer_1895.jpg/800px-Northeaster_by_Winslow_Homer_1895.jpg"), new Data_Tuple.Tuple("https://en.wikipedia.org/wiki/Ilfis_(river)", "https://upload.wikimedia.org/wikipedia/commons/b/bb/Ilfis_en_Langau_en_Emme-Valo_078.jpg") ])(function (v1) {
+            return Halogen_HTML_Elements.a([ Halogen_HTML_Properties.href(v1.value0) ])([ Halogen_HTML_Elements.img([ Halogen_HTML_Properties.src(v1.value1) ]) ]);
+        })), renderSample(bernard0), renderSample(bernard1), renderSample(bernard2) ]);
     };
     var $$eval = function (v) {
         if (v instanceof DoNothing) {
@@ -52183,17 +52260,17 @@ var body = function (dictMonadAff) {
                     };
                     return Data_Functor.mapFlipped(Data_Maybe.functorMaybe)(v.value0.value1)(Data_Tuple.Tuple.create(v.value0.value0));
                 })();
-                var $246 = {};
-                for (var $247 in r) {
-                    if ({}.hasOwnProperty.call(r, $247)) {
-                        $246[$247] = r[$247];
+                var $248 = {};
+                for (var $249 in r) {
+                    if ({}.hasOwnProperty.call(r, $249)) {
+                        $248[$249] = r[$249];
                     };
                 };
-                $246.glossing = glossing;
-                return $246;
+                $248.glossing = glossing;
+                return $248;
             }));
         };
-        throw new Error("Failed pattern match at Main line 620, column 5 - line 620, column 76: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 773, column 5 - line 773, column 76: " + [ v.constructor.name ]);
     };
     return Halogen_Component.lifecycleParentComponent(Data_Ord.ordVoid)({
         "eval": $$eval,
@@ -52224,8 +52301,8 @@ module.exports = {
     Period: Period,
     Colon: Colon,
     Semicolon: Semicolon,
+    Question: Question,
     Enclitic: Enclitic,
-    Translation: Translation,
     word: word,
     comma: comma,
     period: period,
@@ -52234,7 +52311,6 @@ module.exports = {
     colon: colon,
     semicolon: semicolon,
     _que: _que,
-    lit_: lit_,
     mkword: mkword,
     addef: addef,
     as: as,
@@ -52273,6 +52349,9 @@ module.exports = {
     sample: sample,
     passage: passage,
     metron: metron,
+    bernard0: bernard0,
+    bernard1: bernard1,
+    bernard2: bernard2,
     DoNothing: DoNothing,
     Gloss: Gloss,
     body: body,
