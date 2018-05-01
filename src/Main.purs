@@ -567,7 +567,7 @@ bernard0 =
   } where
   introduction = """
   """
-  imminet = verb_ "imminet" @= "hang over, threaten"
+  imminet = verb_ "imminet" @= "project over, hang down over, bend towards; threaten, menace; strive for; impend"
   imminet' = imminet <#> _ { text = "Imminet" }
   substantive w = adjective_ w @$ "substantive"
   -- ā ē ī ō ū
@@ -582,8 +582,9 @@ bernard0 =
       ]
     , [ imminet', comma, imminet, particle_ "ut"
       , substantive "mala", verb_ "terminet", comma
-      , substantive "æqua", verb_ "corōnet", comma, newline
-      , substantive "Recta", verb_ "remūneret", comma
+      , substantive "æqua", verb_ "corōnet", comma
+      ]
+    , [ substantive "Recta" @= "correct, righteous", verb_ "remūneret", comma
       , substantive "anxia", verb_ "līberet", comma
       , substantive "æthera", verb_ "dōnet", period
       ]
@@ -591,12 +592,18 @@ bernard0 =
       , adjective_ "aspera", adjective_ "dūra", _que, noun_ "pondera"
       , noun_ "mentis", adjective_ "onustæ" @= "laden", comma
       ]
-    , [ substantive "sobria", verb_ "mūniat", comma
+    , [ substantive "sobria" @= "sober; sensible", verb_ "mūniat" @= "protect, defend; fortify, strengthen", comma
       , substantive "improba", verb_ "pūniat", comma
       , pronoun_ "ūtraque", adverb_ "justē"
       ]
     ]
   translation = """
+  The hour is very new, the times are the worst, let us be vigilant.
+  Behold, menacingly the lord hangs near, he the highest one.
+  He impends, he threatens to bring an end to {bad|bad things}, to {crown|i.e. in approval} what’s favorable,
+  to reward what’s righteous, to liberate anxieties, to grant ???
+  May he take away hard work and the harsh burdens of a laden mind,
+  May he defend what’s sober, punish what’s wicked, both justly.
   """
 
 bernard1 :: Sample
@@ -622,7 +629,7 @@ bernard1 =
       , noun_ "flamma", _que, adjective_ "frigida"
       , noun_ "pectora", verb_ "torquet" @= "torture" @.. "a pun on retorquet", period
       ]
-    , [ noun_ "Vermis", adjective_ "edāx", verb_ "scatet", conjunction_ "et"
+    , [ noun_ "Vermis", adjective_ "edāx" @= "gluttonous; devouring", verb_ "scatet", conjunction_ "et"
       , noun_ "puteus", verb_ "patet", adjective_ "altus", noun_ "abyssi", period
       ]
     , [ verb_ "Sunt", ibi, noun_ "pectore"
@@ -669,6 +676,9 @@ bernard1 =
     ]
     -- ā ē ī ō ū
   translation = """
+  Firey rivers: flame stirs up black eddies,
+  The winter solstice tortures dry souls, flame tortures cold ones.
+  A serpent
   """
 
 bernard2 :: Sample
@@ -689,9 +699,43 @@ bernard2 =
       , verb_ "sustinet", noun_ "aspera", comma
       , verb_ "migrat", verb_ "humātur", period
       ]
+    , [ noun_ "Glārea", adjective_ "lābilis", comma
+      , noun_ "aura", adjective_ "volātilis", verb_ "est"
+      , noun_ "homō", verb_ "nātus", period
+      ]
+    , [ adverb_ "Māne", verb_ "stat", verb_ "aggere", comma
+      , conjunction_ "nec", noun_ "mora", noun_ "vespere"
+      , verb_ "fertur", adjective_ "humātus", period
+      ]
+    , [ pronoun_ "Quī", adverb_ "modo", noun_ "flōs", verb_ "fuit", comma
+      , preposition_ "in", noun_ "spaciō" @> "spatiō", verb_ "ruit"
+      , adjective_ "ūnius", noun_ "hōræ", period
+      ]
+    , [ adverb_ "Mox", verb_ "rapitur", comma
+      , verb_ "licet", noun_ "ingeniō", verb_ "micet", comma
+      , conjunction_ "atque", noun_ "decōre", period
+      ]
+    , [ verb_ "Fit", noun_ "cinis", adjective_ "infimus", comma
+      , pronoun_ "ille", adjective_ "probissimus"
+      , conjunction_ "et", adjective_ "preciōsus" @> "pretiōsus", comma
+      ]
+    , [ adjective_ "Irreparābilis", comma
+      , adjective_ "irrevocābilis", comma
+      , adjective_ "officiōsus", period
+      ]
+    , [ noun_ "Glēba", verb_ "reconditur"
+      , conjunction_ "atque", verb_ "reclūditur"
+      , noun_ "hospite", noun_ "tumba" @= "tomb", period
+      ]
+    , [ noun_ "Laus" @= "praise, laud", verb_ "stat", noun_ "imāginis", comma
+      , noun_ "umbra" @= "shadow", _que, noun_ "nominis" @= "noun", comma
+      , noun_ "immo", conjunction_ "nec", noun_ "umbra" @= "shadow", period
+      ]
     ]
   -- ā ē ī ō ū
   translation = """
+  Why is a man born, or a boy begotten? To die.
+  He leaves into the air, sustains labors, migrates, is buried.
   """
 
 type State =

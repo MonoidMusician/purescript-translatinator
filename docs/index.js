@@ -52083,20 +52083,6 @@ var adverb = mkword(Adverb.value);
 var adverb_ = function ($269) {
     return word(adverb($269));
 };
-var bernard2 = (function () {
-    
-    // ā ē ī ō ū
-var translation = "\x0a  ";
-    var content = [ [ as(adverb_("Cu\u0304r"))("interrogative"), nota(noun_("homo\u0304"))("apparently metrically short"), verb_("na\u0304scitur"), comma, conjunction_("aut"), noun_("puer"), verb_("e\u0304ditur"), new Data_Either.Left(Question.value), conjunction_("Ut"), verb_("moria\u0304tur"), period ], [ verb_("Exit"), preposition_("in"), noun_("a\u0304era"), comma, verb_("sustinet"), noun_("aspera"), comma, verb_("migrat"), verb_("huma\u0304tur"), period ] ];
-    return {
-        author: "Bernard of Cluny",
-        work: "On Contempt for the World",
-        section: "1.765\u201374",
-        introduction: "\x0a  ",
-        content: content,
-        translation: translation
-    };
-})();
 var adjective = mkword(Adjective.value);
 var adjective_ = function ($270) {
     return word(adjective($270));
@@ -52120,7 +52106,7 @@ var bernard0 = (function () {
     var substantive = function (w) {
         return as(adjective_(w))("substantive");
     };
-    var imminet = addef(verb_("imminet"))("hang over, threaten");
+    var imminet = addef(verb_("imminet"))("project over, hang down over, bend towards; threaten, menace; strive for; impend");
     var imminet$prime = Data_Functor.mapFlipped(Data_Either.functorEither)(imminet)(function (v) {
         var $213 = {};
         for (var $214 in v) {
@@ -52133,20 +52119,20 @@ var bernard0 = (function () {
     });
     
     // ā ē ī ō ū
-var content = [ [ noun_("Hora"), as(adjective_("novissima"))("superlative"), noun_("tempora"), as(from(adjective_("pessima"))("pe\u0304jor"))("superlative"), verb_("sunt"), comma, verb_("vigile\u0304mus"), period ], [ as(particle_("Ecce"))("interjection"), adverb_("mina\u0304citer"), imminet, addef(noun_("arbiter"))("judge, arbitrator; lord, master"), comma, pronoun_("ille"), adjective_("supre\u0304mus") ], [ imminet$prime, comma, imminet, particle_("ut"), substantive("mala"), verb_("terminet"), comma, substantive("\xe6qua"), verb_("coro\u0304net"), comma, newline, substantive("Recta"), verb_("remu\u0304neret"), comma, substantive("anxia"), verb_("li\u0304beret"), comma, substantive("\xe6thera"), verb_("do\u0304net"), period ], [ verb_("Auferat"), comma, adjective_("aspera"), adjective_("du\u0304ra"), _que, noun_("pondera"), noun_("mentis"), addef(adjective_("onust\xe6"))("laden"), comma ], [ substantive("sobria"), verb_("mu\u0304niat"), comma, substantive("improba"), verb_("pu\u0304niat"), comma, pronoun_("u\u0304traque"), adverb_("juste\u0304") ] ];
+var content = [ [ noun_("Hora"), as(adjective_("novissima"))("superlative"), noun_("tempora"), as(from(adjective_("pessima"))("pe\u0304jor"))("superlative"), verb_("sunt"), comma, verb_("vigile\u0304mus"), period ], [ as(particle_("Ecce"))("interjection"), adverb_("mina\u0304citer"), imminet, addef(noun_("arbiter"))("judge, arbitrator; lord, master"), comma, pronoun_("ille"), adjective_("supre\u0304mus") ], [ imminet$prime, comma, imminet, particle_("ut"), substantive("mala"), verb_("terminet"), comma, substantive("\xe6qua"), verb_("coro\u0304net"), comma ], [ addef(substantive("Recta"))("correct, righteous"), verb_("remu\u0304neret"), comma, substantive("anxia"), verb_("li\u0304beret"), comma, substantive("\xe6thera"), verb_("do\u0304net"), period ], [ verb_("Auferat"), comma, adjective_("aspera"), adjective_("du\u0304ra"), _que, noun_("pondera"), noun_("mentis"), addef(adjective_("onust\xe6"))("laden"), comma ], [ addef(substantive("sobria"))("sober; sensible"), addef(verb_("mu\u0304niat"))("protect, defend; fortify, strengthen"), comma, substantive("improba"), verb_("pu\u0304niat"), comma, pronoun_("u\u0304traque"), adverb_("juste\u0304") ] ];
     return {
         author: "Bernard of Cluny",
         work: "On Contempt for the World",
         section: "1.1\u20136",
         introduction: "\x0a  ",
         content: content,
-        translation: "\x0a  "
+        translation: "\x0a  The hour is very new, the times are the worst, let us be vigilant.\x0a  Behold, menacingly the lord hangs near, he the highest one.\x0a  He impends, he threatens to bring an end to {bad|bad things}, to {crown|i.e. in approval} what\u2019s favorable,\x0a  to reward what\u2019s righteous, to liberate anxieties, to grant ???\x0a  May he take away hard work and the harsh burdens of a laden mind,\x0a  May he defend what\u2019s sober, punish what\u2019s wicked, both justly.\x0a  "
     };
 })();
 var bernard1 = (function () {
     
     // ā ē ī ō ū
-var translation = "\x0a  ";
+var translation = "\x0a  Firey rivers: flame stirs up black eddies,\x0a  The winter solstice tortures dry souls, flame tortures cold ones.\x0a  A serpent\x0a  ";
     var non = addef(adverb_("no\u0304n"))("not");
     var non$prime = Data_Functor.mapFlipped(Data_Either.functorEither)(non)(function (v) {
         var $216 = {};
@@ -52169,12 +52155,26 @@ var translation = "\x0a  ";
         $219.text = "Ibi";
         return $219;
     });
-    var content = [ [ adjective_("Ignea"), noun_("flu\u0304mina"), comma, adjective_("nigra"), addef(noun_("volu\u0304mina"))("eddy"), noun_("flamma"), verb_("retorquet"), comma ], [ noun_("Bru\u0304ma"), _que, adjective_("torrida"), comma, noun_("flamma"), _que, adjective_("frigida"), noun_("pectora"), nota(addef(verb_("torquet"))("torture"))("a pun on retorquet"), period ], [ noun_("Vermis"), adjective_("eda\u0304x"), verb_("scatet"), conjunction_("et"), noun_("puteus"), verb_("patet"), adjective_("altus"), noun_("abyssi"), period ], [ verb_("Sunt"), ibi, noun_("pectore"), verb_("sunt"), ibi, noun_("corpore"), pronoun_("qui\u0304que"), as(adjective_("remissi\u0304"))("participle"), period ], [ as(verb_("Lu\u0304dite"))("imperative"), comma, as(verb_("vi\u0304vite"))("imperative"), comma, from(addef(noun_("f\u0153nore"))("f\xe6nore"))("f\xe6nus"), adjective_("di\u0304vite"), comma, noun_("ge\u0304ns"), adjective_("alie\u0304na") ], [ pronoun_("Vo\u0304s"), adjective_("ca\u0304ro\u0304"), verb_("de\u0304cipit"), pronoun_("hic"), comma, ibi, verb_("susce\u0304pit"), pronoun_("illa"), addef(noun_("gehenna"))("hell"), period ], [ non$prime, ibi, noun_("vi\u0304sio\u0304"), comma, non, ibi, noun_("ma\u0304nsio\u0304"), noun_("lu\u0304ce"), adjective_("reple\u0304ta\u0304"), comma ], [ adverb_("No\u0304n"), noun_("locus"), noun_("ordinis"), comma, noun_("aula"), _que, noun_("lu\u0304minis"), comma, noun_("arva"), _que, adjective_("l\xe6ta"), period ], [ particle_("\u014c"), noun_("Maro"), verb_("falleris"), adverb_("hi\u0304c"), adverb_("ubi"), verb_("co\u0304nseris"), noun_("arva"), noun_("pio\u0304rum"), comma ], [ from(noun_("\u0112lysio\u0304s"))("\u1f28\u03bb\u1fe0\u0301\u03c3\u1fd0\u03bf\u03bd"), ibi, non, verb_("reperis"), pronoun_("tibi"), noun_("scri\u0304ptor"), pronoun_("eo\u0304rum"), period ], [ noun_("Mu\u0304sa"), adjective_("poe\u0304tica"), comma, noun_("lingua"), adjective_("scholastica"), comma, noun_("vo\u0304x"), adjective_("thea\u0304tra\u0304lis"), comma ], [ pronoun_("H\xe6c"), conjunction_("quia"), verb_("disseris"), conjunction_("et"), adverb_("mal\u0115"), verb_("falleris"), comma, conjunction_("et"), adverb_("mal\u0115"), verb_("fallis"), period ], [ verb_("Fulgurat"), noun_("ignibus"), adverb_("haud"), noun_("radiantibus"), pronoun_("illa"), addef(noun_("gehenna"))("hell"), comma ], [ adjective_("Ple\u0304na"), noun_("nigredine"), comma, adjective_("ple\u0304na"), _que, noun_("turbine"), comma, adjective_("ple\u0304na"), _que, noun_("p\u0153na\u0304"), period ] ];
+    var content = [ [ adjective_("Ignea"), noun_("flu\u0304mina"), comma, adjective_("nigra"), addef(noun_("volu\u0304mina"))("eddy"), noun_("flamma"), verb_("retorquet"), comma ], [ noun_("Bru\u0304ma"), _que, adjective_("torrida"), comma, noun_("flamma"), _que, adjective_("frigida"), noun_("pectora"), nota(addef(verb_("torquet"))("torture"))("a pun on retorquet"), period ], [ noun_("Vermis"), addef(adjective_("eda\u0304x"))("gluttonous; devouring"), verb_("scatet"), conjunction_("et"), noun_("puteus"), verb_("patet"), adjective_("altus"), noun_("abyssi"), period ], [ verb_("Sunt"), ibi, noun_("pectore"), verb_("sunt"), ibi, noun_("corpore"), pronoun_("qui\u0304que"), as(adjective_("remissi\u0304"))("participle"), period ], [ as(verb_("Lu\u0304dite"))("imperative"), comma, as(verb_("vi\u0304vite"))("imperative"), comma, from(addef(noun_("f\u0153nore"))("f\xe6nore"))("f\xe6nus"), adjective_("di\u0304vite"), comma, noun_("ge\u0304ns"), adjective_("alie\u0304na") ], [ pronoun_("Vo\u0304s"), adjective_("ca\u0304ro\u0304"), verb_("de\u0304cipit"), pronoun_("hic"), comma, ibi, verb_("susce\u0304pit"), pronoun_("illa"), addef(noun_("gehenna"))("hell"), period ], [ non$prime, ibi, noun_("vi\u0304sio\u0304"), comma, non, ibi, noun_("ma\u0304nsio\u0304"), noun_("lu\u0304ce"), adjective_("reple\u0304ta\u0304"), comma ], [ adverb_("No\u0304n"), noun_("locus"), noun_("ordinis"), comma, noun_("aula"), _que, noun_("lu\u0304minis"), comma, noun_("arva"), _que, adjective_("l\xe6ta"), period ], [ particle_("\u014c"), noun_("Maro"), verb_("falleris"), adverb_("hi\u0304c"), adverb_("ubi"), verb_("co\u0304nseris"), noun_("arva"), noun_("pio\u0304rum"), comma ], [ from(noun_("\u0112lysio\u0304s"))("\u1f28\u03bb\u1fe0\u0301\u03c3\u1fd0\u03bf\u03bd"), ibi, non, verb_("reperis"), pronoun_("tibi"), noun_("scri\u0304ptor"), pronoun_("eo\u0304rum"), period ], [ noun_("Mu\u0304sa"), adjective_("poe\u0304tica"), comma, noun_("lingua"), adjective_("scholastica"), comma, noun_("vo\u0304x"), adjective_("thea\u0304tra\u0304lis"), comma ], [ pronoun_("H\xe6c"), conjunction_("quia"), verb_("disseris"), conjunction_("et"), adverb_("mal\u0115"), verb_("falleris"), comma, conjunction_("et"), adverb_("mal\u0115"), verb_("fallis"), period ], [ verb_("Fulgurat"), noun_("ignibus"), adverb_("haud"), noun_("radiantibus"), pronoun_("illa"), addef(noun_("gehenna"))("hell"), comma ], [ adjective_("Ple\u0304na"), noun_("nigredine"), comma, adjective_("ple\u0304na"), _que, noun_("turbine"), comma, adjective_("ple\u0304na"), _que, noun_("p\u0153na\u0304"), period ] ];
     return {
         author: "Bernard of Cluny",
         work: "On Contempt for the World",
         section: "1.635\u2013644",
         introduction: "\x0a  Combines imagery of water with fire, depicting torture in hell.\x0a  ",
+        content: content,
+        translation: translation
+    };
+})();
+var bernard2 = (function () {
+    
+    // ā ē ī ō ū
+var translation = "\x0a  Why is a man born, or a boy begotten? To die.\x0a  He leaves into the air, sustains labors, migrates, is buried.\x0a  ";
+    var content = [ [ as(adverb_("Cu\u0304r"))("interrogative"), nota(noun_("homo\u0304"))("apparently metrically short"), verb_("na\u0304scitur"), comma, conjunction_("aut"), noun_("puer"), verb_("e\u0304ditur"), new Data_Either.Left(Question.value), conjunction_("Ut"), verb_("moria\u0304tur"), period ], [ verb_("Exit"), preposition_("in"), noun_("a\u0304era"), comma, verb_("sustinet"), noun_("aspera"), comma, verb_("migrat"), verb_("huma\u0304tur"), period ], [ noun_("Gla\u0304rea"), adjective_("la\u0304bilis"), comma, noun_("aura"), adjective_("vola\u0304tilis"), verb_("est"), noun_("homo\u0304"), verb_("na\u0304tus"), period ], [ adverb_("Ma\u0304ne"), verb_("stat"), verb_("aggere"), comma, conjunction_("nec"), noun_("mora"), noun_("vespere"), verb_("fertur"), adjective_("huma\u0304tus"), period ], [ pronoun_("Qui\u0304"), adverb_("modo"), noun_("flo\u0304s"), verb_("fuit"), comma, preposition_("in"), sive(noun_("spacio\u0304"))("spatio\u0304"), verb_("ruit"), adjective_("u\u0304nius"), noun_("ho\u0304r\xe6"), period ], [ adverb_("Mox"), verb_("rapitur"), comma, verb_("licet"), noun_("ingenio\u0304"), verb_("micet"), comma, conjunction_("atque"), noun_("deco\u0304re"), period ], [ verb_("Fit"), noun_("cinis"), adjective_("infimus"), comma, pronoun_("ille"), adjective_("probissimus"), conjunction_("et"), sive(adjective_("precio\u0304sus"))("pretio\u0304sus"), comma ], [ adjective_("Irrepara\u0304bilis"), comma, adjective_("irrevoca\u0304bilis"), comma, adjective_("officio\u0304sus"), period ], [ noun_("Gle\u0304ba"), verb_("reconditur"), conjunction_("atque"), verb_("reclu\u0304ditur"), noun_("hospite"), addef(noun_("tumba"))("tomb"), period ], [ addef(noun_("Laus"))("praise, laud"), verb_("stat"), noun_("ima\u0304ginis"), comma, addef(noun_("umbra"))("shadow"), _que, addef(noun_("nominis"))("noun"), comma, noun_("immo"), conjunction_("nec"), addef(noun_("umbra"))("shadow"), period ] ];
+    return {
+        author: "Bernard of Cluny",
+        work: "On Contempt for the World",
+        section: "1.765\u201374",
+        introduction: "\x0a  ",
         content: content,
         translation: translation
     };
@@ -52228,7 +52228,7 @@ var body = function (dictMonadAff) {
                     return Halogen_HTML_Elements.p([ Halogen_HTML_Properties.class_(Data_Newtype.wrap(Halogen_HTML_Core.newtypeClassName)("translation")) ])([ Halogen_HTML_Core.text("\u201c" + (v + "\u201d")) ]);
                 }), nonempty(glossing.value0.value0.notes)(p), nonempty(glossing.value0.value0.role)(p) ]);
             };
-            throw new Error("Failed pattern match at Main line 755, column 7 - line 771, column 12: " + [ glossing.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 799, column 7 - line 815, column 12: " + [ glossing.constructor.name ]);
         })());
     };
     var legend = Data_Foldable.intercalate(Data_Foldable.foldableArray)(Data_Monoid.monoidArray)([ Halogen_HTML_Core.text(", ") ])(Data_Functor.map(Data_Functor.functorArray)(Control_Applicative.pure(Control_Applicative.applicativeArray))(Data_Functor.mapFlipped(Data_Functor.functorArray)([ Verb.value, Adverb.value, Conjunction.value, Preposition.value, Noun.value, Pronoun.value, Adjective.value, Particle.value ])(function (v) {
@@ -52270,7 +52270,7 @@ var body = function (dictMonadAff) {
                 return $248;
             }));
         };
-        throw new Error("Failed pattern match at Main line 773, column 5 - line 773, column 76: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 817, column 5 - line 817, column 76: " + [ v.constructor.name ]);
     };
     return Halogen_Component.lifecycleParentComponent(Data_Ord.ordVoid)({
         "eval": $$eval,
