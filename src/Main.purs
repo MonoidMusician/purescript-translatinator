@@ -110,6 +110,10 @@ nota :: Entity -> String -> Entity
 nota w notes = w <#> _ { notes = notes }
 infixl 9 nota as @..
 
+at :: Entity -> String -> Entity
+at w href = w <#> _ { href = href }
+infixl 9 at as @@
+
 verb :: String -> Word
 verb = mkword Verb
 
@@ -209,8 +213,13 @@ colorType = case _ of
   Particle -> rgb 190 30 148
   Preposition -> rgb 142 44 171
 
+link :: forall w o. String -> HH.HTML w o -> HH.HTML w o
+link "" = id
+link href = HH.a [ HP.href href ] <<< pure
+
 colorize' :: forall o w. Array (HH.IProp HTMLspan o) -> Word -> HH.HTML w o
-colorize' props { word_type, text, role, notes } =
+colorize' props { word_type, text, role, notes, href } =
+  link href
   let
     couleur = CSS.color $ CSS.darken 0.05 $ colorType word_type
     klass = HP.class_ $ wrap $ role <> (if notes /= "" then " notated" else "")
@@ -486,23 +495,23 @@ metron =
   """
   content =
     [ [ noun_ "nūbibus" @= "clouds", adjective_ "ātrīs" @= "dark, black" ]
-    , [ adjective_ "condita" @= "hidden" @$ "nominative subject", adjective_ "nūllum" @= "no" @$ "accusative object" ]
+    , [ adjective_ "condita" @= "hidden" @$ nomsubj, adjective_ "nūllum" @= "no" @$ accobj ]
     , [ verb_ "fundere" @= "to pour", verb_ "possunt" @= "are able" ]
-    , [ noun_ "sīdera" @= "stars" @$ "nominative subject", noun_ "lūmen" @= "light" @$ "accusative object" ]
+    , [ noun_ "sīdera" @= "stars" @$ nomsubj, noun_ "lūmen" @= "light" @$ accobj ]
 
-    , [ conjunction_ "sī" @= "if", noun_ "mare" @= "sea" @$ "accusative object", verb_ "volvēns" @= "rolling" @$ "active" ]
+    , [ conjunction_ "sī" @= "if", noun_ "mare" @= "sea" @$ accobj, verb_ "volvēns" @= "rolling" @$ "active" ]
     , [ adjective_ "turbidus" @= "turbulent", noun_ "Auster" @= "the South Wind" ]
-    , [ verb_ "misceat" @= "stir up", noun_ "æstum" @= "surge" @$ "accusative object", comma ]
+    , [ verb_ "misceat" @= "stir up", noun_ "æstum" @= "surge" @$ accobj, comma ]
     , [ adjective_ "vitrea" @= "glassy", adverb_ "dūdum" @= "just now" ]
     , [ adverb_ "par" @= "equally", _que, adjective_ "serēnīs" @= "tranquil" ]
-    , [ noun_ "unda" @= "wave" @$ "nominative subject", noun_ "diēbus" @= "days" ]
+    , [ noun_ "unda" @= "wave" @$ nomsubj, noun_ "diēbus" @= "days" ]
     , [ adverb_ "mox" @= "soon", adjective_ "resolūtō" @= "loosened" ]
     , [ adjective_ "sordida" @= "foul", noun_ "cænō" @= "mud" @$ "ablative of means" ]
     , [ noun_ "vīsibus" @= "sight(s)", verb_ "obstat" @= "blocks", comma ]
 
-    , [ pronoun_ "quīque" @= "whatever" @$ "nominative subject", verb_ "vagātur" @= "wanders" ]
+    , [ pronoun_ "quīque" @= "whatever" @$ nomsubj, verb_ "vagātur" @= "wanders" ]
     , [ noun_ "montibus" @= "mountains", adjective_ "altīs" @= "tall" ]
-    , [ adjective_ "dēfluus" @= "flowing down" @$ "ablative of place from which", noun_ "amnis" @= "river" @$ "nominative subject" ]
+    , [ adjective_ "dēfluus" @= "flowing down" @$ "ablative of place from which", noun_ "amnis" @= "river" @$ nomsubj ]
     , [ adverb_ "sæpe" @= "often", verb_ "restitit" @= "stops behind, remains" ]
     , [ noun_ "rūpe" @= "cliff", adjective_ "solūtī" @= "loose" ]
     , [ noun_ "ōbice" @< "ōbex" @= "obstacle" @$ "ablative of place where", noun_ "saxī" @= "rock", period ]
@@ -513,15 +522,15 @@ metron =
     , [ noun_ "lūmine" @= "light", adjective_ "clārō" @= "clear" ]
     , [ verb_ "cernere" @= "discern", noun_ "vērum" @= "the truth" @$ "substantive accusative object" ]
     , [ noun_ "trāmite" @= "riverbed", adjective_ "rēctō" @= "straight" ]
-    , [ verb_ "carpere" @= "seize", noun_ "callem" @= "path" @$ "accusative object", colon ]
-    , [ noun_ "gaudia" @= "joys" @$ "accusative object", verb_ "pelle" @= "drive away", comma ]
-    , [ verb_ "pelle" @= "drive away", noun_ "timōrem" @= "fear" @$ "accusative object" ]
+    , [ verb_ "carpere" @= "seize", noun_ "callem" @= "path" @$ accobj, colon ]
+    , [ noun_ "gaudia" @= "joys" @$ accobj, verb_ "pelle" @= "drive away", comma ]
+    , [ verb_ "pelle" @= "drive away", noun_ "timōrem" @= "fear" @$ accobj ]
     , [ noun_ "spem" @= "hope", _que, verb_ "fugātō" @= "put to flight" ]
-    , [ conjunction_ "nec" @= "nor", noun_ "dolor" @= "grief" @$ "nominative subject", verb_ "adsit" @= "be present", period ]
+    , [ conjunction_ "nec" @= "nor", noun_ "dolor" @= "grief" @$ nomsubj, verb_ "adsit" @= "be present", period ]
 
-    , [ adjective_ "nūbila" @= "cloudy" @$ "predicate", noun_ "mēns" @= "mind" @$ "nominative subject", verb_ "est" @= "is" ]
+    , [ adjective_ "nūbila" @= "cloudy" @$ "predicate", noun_ "mēns" @= "mind" @$ nomsubj, verb_ "est" @= "is" ]
     , [ adjective_ "vincta" @= "bound" @$ "predicate", _que, noun_ "frēnīs" @= "bridle" @$ "ablative of instrument" ]
-    , [ pronoun_ "hæc" @= "these things" @$ "nominative subject", adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
+    , [ pronoun_ "hæc" @= "these things" @$ nomsubj, adverb_ "ubi" @= "when", verb_ "regnant" @= "reign", period ]
     ]
   translation = """
   Through dark clouds
@@ -566,14 +575,20 @@ bernard0 =
   , introduction, content, translation
   } where
   introduction = """
+  This is the introduction to the work of Bernard of Cluny titled “On Contempt for the World”.
+  Bernard’s birthplace is unknown (perhaps {Morlaix|https://en.wikipedia.org/wiki/Morlaix} or {Morlaàs|https://en.wikipedia.org/wiki/Morla%C3%A0s}), but not much is known about his life.
+
+  He satirizes the world as he sees it, full of failings, both in the church and in general.
+
+  At the beginning he clearly announces his intention to address contemporary culture, hinting at his wariness of it. He ascribes to God a purpose that most would agree to be good, positive, righteous, but he describes it with a dark undertone: menacing, threatening. Is it really just on both accounts?
   """
   imminet = verb_ "imminet" @= "project over, hang down over, bend towards; threaten, menace; strive for; impend"
   imminet' = imminet <#> _ { text = "Imminet" }
   substantive w = adjective_ w @$ "substantive"
   -- ā ē ī ō ū
   content =
-    [ [ noun_ "Hora", adjective_ "novissima" @$ "superlative"
-      , noun_ "tempora", adjective_ "pessima" @< "pējor" @$ "superlative"
+    [ [ noun_ "Hora" @$ nomsubj, adjective_ "novissima" @$ (nomsubj <> " superlative")
+      , noun_ "tempora" @$ "predicate nominative", adjective_ "pessima" @< "malus" @$ "superlative predicate nominative"
       , verb_ "sunt", comma, verb_ "vigilēmus", period
       ]
     , [ particle_ "Ecce" @$ "interjection"
@@ -586,7 +601,7 @@ bernard0 =
       ]
     , [ substantive "Recta" @= "correct, righteous", verb_ "remūneret", comma
       , substantive "anxia", verb_ "līberet", comma
-      , substantive "æthera", verb_ "dōnet", period
+      , substantive "æthera" @= "the upper air, heaven" @.. "Greek declension" @$ "accusative singular", verb_ "dōnet" @= "grant, bestow", period
       ]
     , [ verb_ "Auferat", comma
       , adjective_ "aspera", adjective_ "dūra", _que, noun_ "pondera"
@@ -598,13 +613,16 @@ bernard0 =
       ]
     ]
   translation = """
-  The hour is very new, the times are the worst, let us be vigilant.
-  Behold, menacingly the lord hangs near, he the highest one.
-  He impends, he threatens to bring an end to {bad|bad things}, to {crown|i.e. in approval} what’s favorable,
-  to reward what’s righteous, to liberate anxieties, to grant ???
-  May he take away hard work and the harsh burdens of a laden mind,
-  May he defend what’s sober, punish what’s wicked, both justly.
+  The newest hour are the worst times: let us be vigilant!
+  Behold, menacingly the {lord|God. (Since everything written in Medieval Latin has to do with God, sooner or later, obviously.)} hangs near, he the highest one
+  Impends, he threatens to bring an end to {bad|bad things}, {to crown|with approval} what’s favorable,
+  to reward what’s righteous, to liberate anxieties, {to grant heaven|i.e. send those who deserve it to heaven}.
+  {May he take away hard work and the harsh burdens of a laden mind|An unsurprising plea for relief from labor.},
+  May he defend what’s sober, punish what’s wicked – both justly.
   """
+
+nomsubj = "nominative subject" :: String
+accobj = "accusative object" :: String
 
 bernard1 :: Sample
 bernard1 =
@@ -614,35 +632,35 @@ bernard1 =
   , introduction, content, translation
   } where
   introduction = """
-  Combines imagery of water with fire, depicting torture in hell.
+  Bernard paints a gloomy picture of torture in hell by melding imagery of water with fire and juxtaposing the sparkling of flame with darkness. He hints that humans should enjoy their time on Earth, because hell is more miserable than even Virgil could imagine. Indeed, he points to art as a source of deception, the cause of why Virgil won’t find the heaven he so clearly described.
   """
   ibi = adverb_ "ibi" @= "there"
   ibi' = ibi <#> _ { text = "Ibi" }
   non = adverb_ "nōn" @= "not"
   non' = non <#> _ { text = "Nōn" }
   content =
-    [ [ adjective_ "Ignea", noun_ "flūmina", comma
-      , adjective_ "nigra", noun_ "volūmina" @= "eddy"
-      , noun_ "flamma", verb_ "retorquet", comma
+    [ [ adjective_ "Ignea" @$ accobj, noun_ "flūmina" @$ accobj, comma
+      , adjective_ "nigra" @$ accobj, noun_ "volūmina" @$ accobj @= "eddy"
+      , noun_ "flamma" @$ nomsubj, verb_ "retorquet" @= "twist back, wheel around", comma
       ]
-    , [ noun_ "Brūma", _que, adjective_ "torrida", comma
-      , noun_ "flamma", _que, adjective_ "frigida"
-      , noun_ "pectora", verb_ "torquet" @= "torture" @.. "a pun on retorquet", period
+    , [ noun_ "Brūma" @= "winter solstice, winter" @$ nomsubj, _que, adjective_ "torrida" @$ accobj, comma
+      , noun_ "flamma" @$ nomsubj, _que, adjective_ "frigida" @$ accobj
+      , noun_ "pectora" @= "breast, chest, heart, spirit, soul" @$ accobj, verb_ "torquet" @= "torture" @.. "a pun on retorquet", period
       ]
-    , [ noun_ "Vermis", adjective_ "edāx" @= "gluttonous; devouring", verb_ "scatet", conjunction_ "et"
-      , noun_ "puteus", verb_ "patet", adjective_ "altus", noun_ "abyssi", period
+    , [ noun_ "Vermis", adjective_ "edāx" @= "greedy, gluttonous; devouring", verb_ "scatet" @= "bubble forth, gush; be plentiful", conjunction_ "et"
+      , noun_ "puteus", verb_ "patet" @= "be open, exposed; extend", adjective_ "altus", noun_ "abyssi", period
       ]
     , [ verb_ "Sunt", ibi, noun_ "pectore"
       , verb_ "sunt", ibi, noun_ "corpore"
-      , pronoun_ "quīque", adjective_ "remissī" @$ "participle", period
+      , pronoun_ "quīque", adjective_ "remissī" @$ "participle" @= "sent back; removed, dismissed; returned; lax", period
       ]
     , [ verb_ "Lūdite" @$ "imperative", comma, verb_ "vīvite" @$ "imperative", comma
-      , noun_ "fœnore" @= "fænore" @< "fænus", adjective_ "dīvite", comma
-      , noun_ "gēns", adjective_ "aliēna"
+      , noun_ "fœnore" @> "fænore" @< "fænus", adjective_ "dīvite", comma
+      , noun_ "gēns" @$ "vocative" @= "race, nation; clan, tribe; house", adjective_ "aliēna" @$ "vocative" @= "foreign, alien, strange"
       ]
     -- ???
-    , [ pronoun_ "Vōs", adjective_ "cārō", verb_ "dēcipit", pronoun_ "hic", comma
-      , ibi, verb_ "suscēpit", pronoun_ "illa", noun_ "gehenna" @= "hell", period
+    , [ pronoun_ "Vōs", adjective_ "caro", verb_ "dēcipit", adverb_ "hīc", comma
+      , ibi, verb_ "suscēpit" @.. "metrically short e", pronoun_ "illa" @.. "where one might expect a derisive ista in Classical Latin", noun_ "gehenna" @@ "https://en.wikipedia.org/wiki/Gehenna" @= "hell", period
       ]
     , [ non', ibi, noun_ "vīsiō", comma
       , non, ibi, noun_ "mānsiō"
@@ -650,35 +668,46 @@ bernard1 =
       ]
     , [ adverb_ "Nōn", noun_ "locus", noun_ "ordinis", comma
       , noun_ "aula", _que, noun_ "lūminis", comma
-      , noun_ "arva", _que, adjective_ "læta", period
+      , noun_ "arva" @= "arable field, glebe", _que, adjective_ "læta", period
       ]
     , [ particle_ "Ō", noun_ "Maro", verb_ "falleris", adverb_ "hīc"
       , adverb_ "ubi", verb_ "cōnseris", noun_ "arva", noun_ "piōrum", comma
       ]
-    , [ noun_ "Ēlysiōs" @< "Ἠλῠ́σῐον", ibi, non, verb_ "reperis"
+    , [ noun_ "Ēlysiōs" @< "Ἠλῠ́σῐον" @@ "https://en.wikipedia.org/wiki/Elysium#Post-classical_literature", ibi, non, verb_ "reperīs"
       , pronoun_ "tibi", noun_ "scrīptor", pronoun_ "eōrum", period
       ]
     , [ noun_ "Mūsa", adjective_ "poētica", comma
       , noun_ "lingua", adjective_ "scholastica", comma
       , noun_ "vōx", adjective_ "theātrālis", comma
       ]
-    , [ pronoun_ "Hæc", conjunction_ "quia", verb_ "disseris"
+    , [ pronoun_ "Hæc", conjunction_ "quia" @= "because" @.. "postponed conjunction, it’s meaning should be taken before hæc", verb_ "disseris"
       , conjunction_ "et", adverb_ "malĕ", verb_ "falleris", comma
       , conjunction_ "et", adverb_ "malĕ", verb_ "fallis", period
       ]
-    , [ verb_ "Fulgurat", noun_ "ignibus", adverb_ "haud"
-      , noun_ "radiantibus", pronoun_ "illa", noun_ "gehenna" @= "hell", comma
+    , [ verb_ "Fulgurat", noun_ "ignibus", adverb_ "haud" @= "not at all"
+      , adjective_ "radiantibus" @= "beam, shine, radiate", pronoun_ "illa", noun_ "gehenna" @= "hell", comma
       ]
     , [ adjective_ "Plēna", noun_ "nigredine", comma
-      , adjective_ "plēna", _que, noun_ "turbine", comma
+      , adjective_ "plēna", _que, noun_ "turbine" @= "whirling, hurricane", comma
       , adjective_ "plēna", _que, noun_ "pœnā", period
       ]
     ]
     -- ā ē ī ō ū
   translation = """
-  Firey rivers: flame stirs up black eddies,
-  The winter solstice tortures dry souls, flame tortures cold ones.
-  A serpent
+  Fiery rivers, black eddies – flame stirs them up,
+  Winter tortures dry hearts, flame tortures cold ones.
+  {A greedy serpent bubbles forth|Perhaps an image of a jet of flame leaping out of the river; but also literal serpents are associated with hell and evil, as in the story of Adam and Eve (scatet can simply mean “it is plentiful”)} and {a deep well of the abyss is exposed|Presumably the center one of the eddies – the poet shifts to focus on a particular image, as opposed to the whole picture}.
+  Whoever is removed from their body are there, as are those removed from their soul.
+  Play! Live with rich profit, {strange clan|Directly addressing this with the commands to play and live richly, while they’re still alive in flesh. This is a shift in the poem.}.
+  Flesh deceives {you|pl., the members of the strange clan} {here|On Earth.}, {there|In Hell} {hell|The first time hell is specifically mentioned in this section.} received you.
+  Vision’s not there, habitation there is not with full light.
+  Not a place of order and palace of light with happy fields.
+  Oh {Maro|Another shift in the poem, this refers to the poet Virgil (Publius Maro Vergilius), who is an inspiration for a lot of poetry (especially in the Medieval Era). His description of the underworld in the Aeneid is well-known, and likely inspired aspects of this passage.}, you are deceived here, where you {sow the fields of the pious|Is this referring to Virgil’s description of it?},
+  You do not find {the Elysian fields|The place in the underworld given to the blessed in their afterlife. This is of course a pagan notion, but a lot of these terms are taken wholesale into Christian traditions.} there for yourself, {author of them|Since he wrote about them.}.
+  Muse of poetry, tongue of school, voice of theatre—
+  Because you discuss {these|the muse, tongue, and voice}, you are both badly deceived, and you badly deceive.
+  The hell shines with {fires shining not at all|An oxymoron??? perhaps related to the absence of vision.},
+  Full of darkness, full of {whirling|Referring back to the eddies of flames.}, full of punishment.
   """
 
 bernard2 :: Sample
@@ -689,33 +718,38 @@ bernard2 =
   , introduction, content, translation
   } where
   introduction = """
+  Continuing his pessimistic streak (or is it character?), Bernard laments the brevity of life. No matter how exceptional one may be, even from birth, all this is quickly lost when death comes, and no legacy remains, he says.
   """
   content =
     [ [ adverb_ "Cūr" @$ "interrogative", noun_ "homō" @.. "apparently metrically short", verb_ "nāscitur", comma
       , conjunction_ "aut", noun_ "puer", verb_ "ēditur", Left Question
-      , conjunction_ "Ut", verb_ "moriātur", period
+      , conjunction_ "Ut" @$ "purpose clause", verb_ "moriātur", period
       ]
     , [ verb_ "Exit", preposition_ "in", noun_ "āera", comma
       , verb_ "sustinet", noun_ "aspera", comma
       , verb_ "migrat", verb_ "humātur", period
       ]
     , [ noun_ "Glārea", adjective_ "lābilis", comma
-      , noun_ "aura", adjective_ "volātilis", verb_ "est"
+      , noun_ "aura" @= "gentle breeze", adjective_ "volātilis" @= "winged; swift, rapid, fleeting; volatile", verb_ "est"
       , noun_ "homō", verb_ "nātus", period
       ]
-    , [ adverb_ "Māne", verb_ "stat", verb_ "aggere", comma
-      , conjunction_ "nec", noun_ "mora", noun_ "vespere"
+    , [ adverb_ "Māne" @= "early in the morning", verb_ "stat", noun_ "aggere" @< "agger" @= "rampart; pier, dam, dyke", comma
+      , conjunction_ "nec" @.. "negating morā", noun_ "morā" @.. "seems to be metrically short", noun_ "vespere" @= "in the evening"
       , verb_ "fertur", adjective_ "humātus", period
       ]
     , [ pronoun_ "Quī", adverb_ "modo", noun_ "flōs", verb_ "fuit", comma
-      , preposition_ "in", noun_ "spaciō" @> "spatiō", verb_ "ruit"
+      , preposition_ "in", noun_ "spaciō" @> "spatiō"
+      , verb_ "ruit" @= "fall, rush, tumble down"
       , adjective_ "ūnius", noun_ "hōræ", period
       ]
     , [ adverb_ "Mox", verb_ "rapitur", comma
-      , verb_ "licet", noun_ "ingeniō", verb_ "micet", comma
+      , conjunction_ "licet" @@ "http://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=licet"
+      , noun_ "ingeniō" @= "nature, natural quality; talent; genius" @@ "https://en.wiktionary.org/wiki/ingenium"
+      , verb_ "micet" @= "tremble, quiver; twinkle, sparkle" @$ "concessive subjunctive", comma
       , conjunction_ "atque", noun_ "decōre", period
       ]
-    , [ verb_ "Fit", noun_ "cinis", adjective_ "infimus", comma
+    , [ verb_ "Fit", noun_ "cinis"
+      , adjective_ "īnfimus" @< "īnferus" @@ "http://www.perseus.tufts.edu/hopper/text?doc=inferus&fromdoc=Perseus%3Atext%3A1999.04.0059" @= "lowest" @.. "particularly associated with death and the underworld", comma
       , pronoun_ "ille", adjective_ "probissimus"
       , conjunction_ "et", adjective_ "preciōsus" @> "pretiōsus", comma
       ]
@@ -723,19 +757,27 @@ bernard2 =
       , adjective_ "irrevocābilis", comma
       , adjective_ "officiōsus", period
       ]
-    , [ noun_ "Glēba", verb_ "reconditur"
+    , [ noun_ "Glēba" @> "glæba" @= "lump of earth, clod", verb_ "reconditur"
       , conjunction_ "atque", verb_ "reclūditur"
-      , noun_ "hospite", noun_ "tumba" @= "tomb", period
+      , noun_ "hospite" @$ "ablative of separation", noun_ "tumba" @= "tomb", period
       ]
     , [ noun_ "Laus" @= "praise, laud", verb_ "stat", noun_ "imāginis", comma
       , noun_ "umbra" @= "shadow", _que, noun_ "nominis" @= "noun", comma
-      , noun_ "immo", conjunction_ "nec", noun_ "umbra" @= "shadow", period
+      , particle_ "immo", conjunction_ "nec", noun_ "umbra" @= "shadow", period
       ]
     ]
   -- ā ē ī ō ū
   translation = """
   Why is a man born, or a boy begotten? To die.
   He leaves into the air, sustains labors, migrates, is buried.
+  {As slippery gravel, as rapid breeze|oxymorons, especially considering that aura carries the connotation of a gentle breeze} a human is born.
+  Early in the morning he stands on a dam, and he, buried with no delay, is carried off in the evening.
+  What was just a flower, tumbled down in the space of an hour.
+  Soon he is snatched, although he sparkles with genius and beauty.
+  He becomes the lowest ash, he most honest and precious:
+  {Irrecoverable, irrevocable|Death is permanent.}, {dutiful|This should be taken as referring back to the subject of the passage (not death), especially given the parallel ‑ōsus endings that contrast with the previous two adjectives.}.
+  Soil is buried and the tomb is shut off from the {guest|Implying that the subject was a guest on Earth, this starts the trailing off of the man from being a flesh-and-blood human …|}.
+  Praise of the {image|… already reduced to a mere image …} stands, a name’s shadow,—nay, not even a {shadow|… to being forgotten.}.
   """
 
 type State =
