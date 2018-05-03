@@ -378,7 +378,7 @@ passage =
     , [ adverb_ "Quārē", adverb_ "plēnissimē" @$ "superlative"
       , conjunction_ "vel"
         , noun_ "ægritūdinis", pronoun_ "tuæ"
-      , noun_ "ratiōnem" @= "account", conjunction_ "vel" -- ???
+      , noun_ "ratiōnem" @= "account", conjunction_ "vel"
       , noun_ "aditum", noun_ "reconciliandæ" @$ "gerundive"
       , noun_ "sospitātis" @= "safety, health, welfare"
       , verb_ "invēnī", period
@@ -594,7 +594,7 @@ bernard0 =
       ]
     , [ particle_ "Ecce" @$ "interjection"
       , adverb_ "mināciter", imminet, noun_ "arbiter" @= "judge, arbitrator; lord, master", comma
-      , pronoun_ "ille", adjective_ "suprēmus"
+      , pronoun_ "ille", adjective_ "suprēmus", period
       ]
     , [ imminet', comma, imminet, particle_ "ut"
       , substantive "mala", verb_ "terminet", comma
@@ -610,13 +610,13 @@ bernard0 =
       ]
     , [ substantive "sobria" @= "sober; sensible", verb_ "mūniat" @= "protect, defend; fortify, strengthen", comma
       , substantive "improba", verb_ "pūniat", comma
-      , pronoun_ "ūtraque", adverb_ "justē"
+      , pronoun_ "ūtraque", adverb_ "justē", period
       ]
     ]
   translation = """
   The newest hour are the worst times: let us be vigilant!
-  Behold, menacingly the {lord|God. (Since everything written in Medieval Latin has to do with God, sooner or later, obviously.)} hangs near, he the highest one
-  Impends, he threatens to bring an end to {bad|bad things}, {to crown|with approval} what’s favorable,
+  Behold, menacingly the {lord|God. (Since everything written in Medieval Latin has to do with God, sooner or later, obviously.)} hangs near, he the highest one.
+  He impends, he threatens to bring an end to {bad|bad things}, {to crown|with approval} what’s favorable,
   to reward what’s righteous, to liberate anxieties, {to grant heaven|i.e. send those who deserve it to heaven}.
   {May he take away hard work and the harsh burdens of a laden mind|An unsurprising plea for relief from labor.},
   May he defend what’s sober, punish what’s wicked – both justly.
@@ -651,7 +651,7 @@ bernard1 =
     , [ noun_ "Vermis", adjective_ "edāx" @= "greedy, gluttonous; devouring", verb_ "scatet" @= "bubble forth, gush; be plentiful", conjunction_ "et"
       , noun_ "puteus", verb_ "patet" @= "be open, exposed; extend", adjective_ "altus", noun_ "abyssi", period
       ]
-    , [ verb_ "Sunt", ibi, noun_ "pectore"
+    , [ verb_ "Sunt", ibi, noun_ "pectore", comma
       , verb_ "sunt", ibi, noun_ "corpore"
       , pronoun_ "quīque", adjective_ "remissī" @$ "participle" @= "sent back; removed, dismissed; returned; lax", period
       ]
@@ -661,7 +661,7 @@ bernard1 =
       , noun_ "gēns" @$ "vocative" @= "race, nation; clan, tribe; house", adjective_ "aliēna" @$ "vocative" @= "foreign, alien, strange"
       ]
     , [ pronoun_ "Vōs", adjective_ "caro", verb_ "dēcipit", adverb_ "hīc", comma
-      , ibi, verb_ "suscēpit" @.. "metrically short e", pronoun_ "illa" @.. "where one might expect a derisive ista in Classical Latin", noun_ "gehenna" @@ "https://en.wikipedia.org/wiki/Gehenna" @= "hell", period
+      , ibi, verb_ "suscipit", pronoun_ "illa" @.. "where one might expect a derisive ista in Classical Latin", noun_ "gehenna" @@ "https://en.wikipedia.org/wiki/Gehenna" @= "hell", period
       ]
     , [ non', ibi, noun_ "vīsiō", comma
       , non, ibi, noun_ "mānsiō"
@@ -731,7 +731,7 @@ bernard2 =
       ]
     , [ verb_ "Exit", preposition_ "in", noun_ "āera", comma
       , verb_ "sustinet", noun_ "aspera", comma
-      , verb_ "migrat", verb_ "humātur", period
+      , verb_ "migrat", comma, verb_ "humātur", period
       ]
     , [ noun_ "Glārea", adjective_ "lābilis", comma
       , noun_ "aura" @= "gentle breeze", adjective_ "volātilis" @= "winged; swift, rapid, fleeting; volatile", verb_ "est"
