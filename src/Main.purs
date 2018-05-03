@@ -20,7 +20,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (wrap)
 import Data.Bifunctor (lmap)
 import Data.String as String
-import Data.Tuple (Tuple(..), snd)
+import Data.Tuple (Tuple(..), snd, uncurry)
 import Halogen as H
 import Halogen.Aff (HalogenEffects, awaitLoad, runHalogenAff, selectElement)
 import Halogen.HTML as HH
@@ -279,15 +279,15 @@ search c s = Tuple
   (String.takeWhile (_ /= c) s)
   (String.drop 1 $ String.dropWhile (_ /= c) s)
 
-parseTrans :: String -> List.List Annote
-parseTrans "" = List.Nil
-parseTrans s0 = go s0
+parseTrans' :: Char -> Char -> String -> List.List Annote
+parseTrans' _ _ "" = List.Nil
+parseTrans' b e s0 = go s0
   where
     sing = Tuple ""
     consingif "" = id
     consingif s = List.Cons (sing s)
     go s =
-      let Tuple plain remaining = search '{' s in
+      let Tuple plain remaining = search b s in
       case remaining of
         "" ->
           case plain of
@@ -296,12 +296,14 @@ parseTrans s0 = go s0
         _ ->
           let
             Tuple trans left = search '|' remaining
-            Tuple annote rest = lmap String.trim $ search '}' left
+            Tuple annote rest = lmap String.trim $ search e left
             consing = case trans of
               "" -> id
               _ -> List.Cons (Tuple annote trans)
           in consingif plain $ consing $ go rest
 
+parseTrans :: String -> List.List Annote
+parseTrans = parseTrans'  '{' '}'
 
 renderTrans :: forall w. Annote -> HH.HTML w (Tuple Boolean (Maybe Annote))
 renderTrans (Tuple "" trans) = HH.text trans
@@ -358,7 +360,7 @@ passage =
   , introduction, content, translation
   } where
   introduction = """
-  These are two related excerpts from a work of Anicius Manlius Severinus Boëthius. The central figure in the work is Lady Philosophy, a personification of philosophical arguments which Boëthius addresses to his own character.
+  These are two related excerpts from a work of {Anicius Manlius Severinus Boëthius|https://en.wikipedia.org/wiki/Boethius}, a 6th-century politician and philosopher. The central figure in the work is Lady Philosophy, a personification of philosophical arguments which Boëthius addresses to his own character.
   This was written while Boëthius was awaiting execution; formerly part of the government of the {Ostrogothic King Theodoric the Great|https://en.wikipedia.org/wiki/Theoderic_the_Great}, he was implicated (falsely, he claims!) in treasonous acts, and sentenced to death. This work is his way of dealing with death, wrestling with ideas of (mis)fortune, chance, and justice as well; addressing these however through philosophy, not religion.
   This prose passage is part of Lady Philosophy’s logical argument towards him.
   """
@@ -575,12 +577,11 @@ bernard0 =
   , introduction, content, translation
   } where
   introduction = """
-  This is the introduction to the work of Bernard of Cluny titled “On Contempt for the World”.
-  Bernard’s birthplace is unknown (perhaps {Morlaix|https://en.wikipedia.org/wiki/Morlaix} or {Morlaàs|https://en.wikipedia.org/wiki/Morla%C3%A0s}), but not much is known about his life.
+  This is the introduction to the work of Bernard of Cluny titled “On Contempt for the World”. In it, he satirizes the world as he sees it: full of failings, both in the church and in general.
 
-  He satirizes the world as he sees it, full of failings, both in the church and in general.
+  Bernard’s birthplace is unknown (perhaps {Morlaix|https://en.wikipedia.org/wiki/Morlaix} or {Morlaàs|https://en.wikipedia.org/wiki/Morla%C3%A0s}), but not much is known about his life, other than that he was a monk at {Cluny Abbey|https://en.wikipedia.org/wiki/Cluny_Abbey} in the twelfth century. It appears that he did not need to be betrayed, awaiting execution to develop a sense of pessimism about the world of his time.
 
-  At the beginning he clearly announces his intention to address contemporary culture, hinting at his wariness of it. He ascribes to God a purpose that most would agree to be good, positive, righteous, but he describes it with a dark undertone: menacing, threatening. Is it really just on both accounts?
+  At the beginning he clearly announces his intention to address contemporary culture (“hora novissima”), hinting at his wariness of it (“vigilemus”). He ascribes to God a purpose that most would agree to be good, positive, righteous, but he describes it with a dark undertone: menacing, threatening. Is it really just on both accounts?
   """
   imminet = verb_ "imminet" @= "project over, hang down over, bend towards; threaten, menace; strive for; impend"
   imminet' = imminet <#> _ { text = "Imminet" }
@@ -654,11 +655,11 @@ bernard1 =
       , verb_ "sunt", ibi, noun_ "corpore"
       , pronoun_ "quīque", adjective_ "remissī" @$ "participle" @= "sent back; removed, dismissed; returned; lax", period
       ]
+    , []
     , [ verb_ "Lūdite" @$ "imperative", comma, verb_ "vīvite" @$ "imperative", comma
       , noun_ "fœnore" @> "fænore" @< "fænus", adjective_ "dīvite", comma
       , noun_ "gēns" @$ "vocative" @= "race, nation; clan, tribe; house", adjective_ "aliēna" @$ "vocative" @= "foreign, alien, strange"
       ]
-    -- ???
     , [ pronoun_ "Vōs", adjective_ "caro", verb_ "dēcipit", adverb_ "hīc", comma
       , ibi, verb_ "suscēpit" @.. "metrically short e", pronoun_ "illa" @.. "where one might expect a derisive ista in Classical Latin", noun_ "gehenna" @@ "https://en.wikipedia.org/wiki/Gehenna" @= "hell", period
       ]
@@ -670,6 +671,7 @@ bernard1 =
       , noun_ "aula", _que, noun_ "lūminis", comma
       , noun_ "arva" @= "arable field, glebe", _que, adjective_ "læta", period
       ]
+    , []
     , [ particle_ "Ō", noun_ "Maro", verb_ "falleris", adverb_ "hīc"
       , adverb_ "ubi", verb_ "cōnseris", noun_ "arva", noun_ "piōrum", comma
       ]
@@ -684,7 +686,7 @@ bernard1 =
       , conjunction_ "et", adverb_ "malĕ", verb_ "falleris", comma
       , conjunction_ "et", adverb_ "malĕ", verb_ "fallis", period
       ]
-    , [ verb_ "Fulgurat", noun_ "ignibus", adverb_ "haud" @= "not at all"
+    , [ verb_ "Fulgurat", noun_ "ignibus", adverb_ "haud" @= "not at all" @.. "seems to be modifying the whole clause"
       , adjective_ "radiantibus" @= "beam, shine, radiate", pronoun_ "illa", noun_ "gehenna" @= "hell", comma
       ]
     , [ adjective_ "Plēna", noun_ "nigredine", comma
@@ -698,15 +700,17 @@ bernard1 =
   Winter tortures dry hearts, flame tortures cold ones.
   {A greedy serpent bubbles forth|Perhaps an image of a jet of flame leaping out of the river; but also literal serpents are associated with hell and evil, as in the story of Adam and Eve (scatet can simply mean “it is plentiful”)} and {a deep well of the abyss is exposed|Presumably the center one of the eddies – the poet shifts to focus on a particular image, as opposed to the whole picture}.
   Whoever is removed from their body are there, as are those removed from their soul.
+  —
   Play! Live with rich profit, {strange clan|Directly addressing this with the commands to play and live richly, while they’re still alive in flesh. This is a shift in the poem.}.
-  Flesh deceives {you|pl., the members of the strange clan} {here|On Earth.}, {there|In Hell} {hell|The first time hell is specifically mentioned in this section.} received you.
-  Vision’s not there, habitation there is not with full light.
-  Not a place of order and palace of light with happy fields.
+  Flesh deceives {you|pl., the members of the strange clan} {here|On Earth.}; {there|In Hell} {hell|The first time hell is specifically mentioned in this section.} received you.
+  {Vision’s not there|Hell is a place of darkness}, habitation there is not with full light.
+  Not a place of order and a palace of light and happy fields.
+  —
   Oh {Maro|Another shift in the poem, this refers to the poet Virgil (Publius Maro Vergilius), who is an inspiration for a lot of poetry (especially in the Medieval Era). His description of the underworld in the Aeneid is well-known, and likely inspired aspects of this passage.}, you are deceived here, where you {sow the fields of the pious|Is this referring to Virgil’s description of it?},
   You do not find {the Elysian fields|The place in the underworld given to the blessed in their afterlife. This is of course a pagan notion, but a lot of these terms are taken wholesale into Christian traditions.} there for yourself, {author of them|Since he wrote about them.}.
   Muse of poetry, tongue of school, voice of theatre—
   Because you discuss {these|the muse, tongue, and voice}, you are both badly deceived, and you badly deceive.
-  The hell shines with {fires shining not at all|An oxymoron??? perhaps related to the absence of vision.},
+  The hell {shines not at all|One would expect fires to give off light, but vision is lacking in hell.} with radiating fires,
   Full of darkness, full of {whirling|Referring back to the eddies of flames.}, full of punishment.
   """
 
@@ -718,7 +722,7 @@ bernard2 =
   , introduction, content, translation
   } where
   introduction = """
-  Continuing his pessimistic streak (or is it character?), Bernard laments the brevity of life. No matter how exceptional one may be, even from birth, all this is quickly lost when death comes, and no legacy remains, he says.
+  Continuing his pessimistic streak (or is it character?), Bernard laments the brevity of life. No matter how exceptional one may be, even from birth, all this is quickly lost when death comes, and no legacy remains, he says. The contrast is drawn in each line of the poem, flitting between positive attributes on Earth, and how little they mean after death.
   """
   content =
     [ [ adverb_ "Cūr" @$ "interrogative", noun_ "homō" @.. "apparently metrically short", verb_ "nāscitur", comma
@@ -734,7 +738,7 @@ bernard2 =
       , noun_ "homō", verb_ "nātus", period
       ]
     , [ adverb_ "Māne" @= "early in the morning", verb_ "stat", noun_ "aggere" @< "agger" @= "rampart; pier, dam, dyke", comma
-      , conjunction_ "nec" @.. "negating morā", noun_ "morā" @.. "seems to be metrically short", noun_ "vespere" @= "in the evening"
+      , conjunction_ "nec" @.. "negating morā alone", noun_ "morā" @.. "seems to be metrically short", noun_ "vespere" @= "in the evening"
       , verb_ "fertur", adjective_ "humātus", period
       ]
     , [ pronoun_ "Quī", adverb_ "modo", noun_ "flōs", verb_ "fuit", comma
@@ -771,7 +775,7 @@ bernard2 =
   Why is a man born, or a boy begotten? To die.
   He leaves into the air, sustains labors, migrates, is buried.
   {As slippery gravel, as rapid breeze|oxymorons, especially considering that aura carries the connotation of a gentle breeze} a human is born.
-  Early in the morning he stands on a dam, and he, buried with no delay, is carried off in the evening.
+  Early in the morning he stands on a dam, and he, buried with no delay, is carried off {in the evening|The metaphor of a person’s life in a day, born in the morning and dying in the evening, is very classical. See, for example, [the riddle of the Sphinx in Œdipus|https://www.pitt.edu/~edfloyd/Class1130/sphinx.html].}.
   What was just a flower, tumbled down in the space of an hour.
   Soon he is snatched, although he sparkles with genius and beauty.
   He becomes the lowest ash, he most honest and precious:
@@ -843,7 +847,9 @@ body = H.lifecycleParentComponent
         Just (Right (Tuple "" trans)) -> []
         Just (Right (Tuple annote trans)) ->
           [ HH.h4_ [ HH.text trans ]
-          , HH.span [ HP.class_ (wrap "annotation") ] [ HH.text annote ]
+          , HH.span [ HP.class_ (wrap "annotation") ]
+            $ map (uncurry link <<< map HH.text)
+            $ Array.fromFoldable $ parseTrans'  '[' ']' annote
           ]
         Just (Left glossed) -> join
           [ pure $ HH.h3_ [ colorize glossed ]
